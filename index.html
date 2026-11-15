@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>眼师五行八识图演示工具 · 历史版本索引</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --page-bg: linear-gradient(135deg, #f5f6fa 0%, #e9ebf1 100%);
+    --panel-bg: #fff;
+    --border: #e3e6ec;
+    --border-light: #eef0f4;
+    --text: #333;
+    --text-strong: #1f2328;
+    --text-sub: #6b7280;
+    --text-muted: #9aa1ad;
+    --accent: #1677ff;
+    --accent-bg: #e6f4ff;
+    --shadow: 0 2px 12px rgba(15, 23, 42, .06);
+    --radius: 10px;
+  }
+  html, body { height: 100%; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    background: var(--page-bg);
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+    font-size: 14px;
+  }
+
+  /* ---------- 顶部标题 ---------- */
+  .app-header { flex: none; padding: 18px 24px 12px; }
+  .app-title { font-size: 19px; font-weight: 600; color: var(--text-strong); display: flex; align-items: center; gap: 10px; }
+  .app-logo {
+    flex: 0 0 auto; width: 1.35em; height: 1.35em; display: block;
+    border-radius: 50%; background: #fff;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, .14);
+  }
+  .app-badge {
+    font-size: 12px; font-weight: 400; color: var(--accent);
+    background: var(--accent-bg); border-radius: 999px; padding: 2px 10px;
+  }
+  .app-subtitle { margin-top: 6px; font-size: 12.5px; color: var(--text-muted); }
+
+  /* ---------- 主体布局 ---------- */
+  .app-main {
+    flex: 1; min-height: 0;
+    display: grid; grid-template-columns: 304px minmax(0, 1fr);
+    gap: 16px; padding: 0 24px 20px;
+  }
+
+  /* ---------- 版本列表 ---------- */
+  .version-panel {
+    display: flex; flex-direction: column; min-height: 0;
+    background: var(--panel-bg); border: 1px solid var(--border);
+    border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden;
+  }
+  .panel-head { flex: none; padding: 12px; border-bottom: 1px solid var(--border-light); }
+  .search-input {
+    width: 100%; padding: 8px 10px; font-size: 13px; color: var(--text);
+    border: 1px solid var(--border); border-radius: 8px; outline: none;
+    background: #fafbfc; transition: border-color .15s, box-shadow .15s;
+  }
+  .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(22, 119, 255, .12); background: #fff; }
+
+  .version-list { flex: 1; min-height: 0; overflow-y: auto; list-style: none; padding: 8px; }
+  .version-item {
+    padding: 10px; border-radius: 8px; border: 1px solid transparent;
+    margin-bottom: 6px; transition: background .15s, border-color .15s;
+  }
+  .version-item:hover { background: #f7f8fa; }
+  .version-item.active { background: var(--accent-bg); border-color: rgba(22, 119, 255, .28); }
+  .version-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+  .version-name { font-size: 14px; font-weight: 600; color: var(--text-strong); }
+  .version-date { font-size: 11.5px; color: var(--text-muted); }
+  .version-highlights { margin-top: 5px; font-size: 12px; line-height: 1.55; color: var(--text-sub); }
+  .version-files { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .file-chip {
+    font-size: 11.5px; padding: 3px 9px; border-radius: 999px; cursor: pointer;
+    border: 1px solid var(--border); background: #fff; color: var(--text-sub);
+    transition: all .15s; font-family: inherit;
+  }
+  .file-chip:hover { border-color: var(--accent); color: var(--accent); }
+  .file-chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .file-chip.is-missing { opacity: .5; cursor: not-allowed; border-style: dashed; }
+  .panel-foot {
+    flex: none; padding: 9px 12px; border-top: 1px solid var(--border-light);
+    font-size: 11.5px; color: var(--text-muted); line-height: 1.6;
+  }
+  .empty-tip { padding: 24px 12px; text-align: center; font-size: 12.5px; color: var(--text-muted); }
+
+  /* ---------- 预览区 ---------- */
+  .preview-panel {
+    display: flex; flex-direction: column; min-height: 0; min-width: 0;
+    background: var(--panel-bg); border: 1px solid var(--border);
+    border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden;
+  }
+  .toolbar {
+    flex: none; display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; padding: 10px 12px; border-bottom: 1px solid var(--border-light); flex-wrap: wrap;
+  }
+  .toolbar-left, .toolbar-right { display: flex; align-items: center; gap: 8px; }
+  .tool-btn {
+    font-family: inherit; font-size: 12.5px; color: var(--text-sub);
+    background: #fff; border: 1px solid var(--border); border-radius: 7px;
+    padding: 6px 11px; cursor: pointer; transition: all .15s; white-space: nowrap;
+  }
+  .tool-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+  .tool-btn:disabled { opacity: .45; cursor: not-allowed; }
+  .tool-btn.is-on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .current-name { font-size: 13px; font-weight: 600; color: var(--text-strong); margin-left: 4px; }
+
+  .variant-switch {
+    display: flex; padding: 2px; gap: 2px;
+    background: #f1f3f7; border-radius: 8px;
+  }
+  .variant-btn {
+    font-family: inherit; font-size: 12px; color: var(--text-sub);
+    background: transparent; border: none; border-radius: 6px;
+    padding: 5px 10px; cursor: pointer; transition: all .15s;
+  }
+  .variant-btn.active { background: #fff; color: var(--accent); box-shadow: 0 1px 3px rgba(15, 23, 42, .1); }
+
+  .frame-wrap { position: relative; flex: 1; min-height: 0; background: #f7f8fa; }
+  .preview-frame { width: 100%; height: 100%; border: none; background: #fff; display: block; }
+
+  .loading-mask {
+    position: absolute; inset: 0; display: none;
+    flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+    background: rgba(247, 248, 250, .94); z-index: 2;
+  }
+  .loading-mask.is-visible { display: flex; }
+  .spinner {
+    width: 34px; height: 34px; border-radius: 50%;
+    border: 3px solid rgba(22, 119, 255, .18); border-top-color: var(--accent);
+    animation: spin .85s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-size: 12.5px; color: var(--text-sub); text-align: center; line-height: 1.7; }
+  .loading-hint { font-size: 11.5px; color: var(--text-muted); }
+
+  .info-bar {
+    flex: none; padding: 9px 12px; border-top: 1px solid var(--border-light);
+    font-size: 11.5px; color: var(--text-sub); display: flex; gap: 14px; flex-wrap: wrap;
+    align-items: center;
+  }
+  .info-item { display: inline-flex; align-items: center; gap: 5px; }
+  .info-label { color: var(--text-muted); }
+  .info-path { font-family: ui-monospace, Consolas, monospace; font-size: 11px; color: var(--text-sub); }
+
+  /* ---------- 小屏 ---------- */
+  @media (max-width: 880px) {
+    body { overflow: auto; height: auto; min-height: 100vh; }
+    .app-main { grid-template-columns: 1fr; padding: 0 14px 16px; }
+    .version-panel { max-height: 42vh; }
+    .preview-panel { height: 70vh; }
+    .app-header { padding: 14px 14px 10px; }
+  }
+</style>
+</head>
+<body>
+  <header class="app-header">
+    <h1 class="app-title">
+      <svg class="app-logo" viewBox="0 0 64 64" role="img" aria-label="眼师五行八识图 logo" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="30.8" fill="#fff"/><g fill="#fff"><circle cx="32" cy="11.5" r="10.25"/><circle cx="11.5" cy="32" r="10.25"/><circle cx="52.5" cy="32" r="10.25"/><circle cx="32" cy="52.5" r="10.25"/><circle cx="32" cy="32" r="10.25"/></g><g fill="#111"><circle cx="32" cy="11.5" r="4.75"/><circle cx="11.5" cy="32" r="10.25"/><circle cx="52.5" cy="32" r="6.75"/><circle cx="32" cy="52.5" r="10.25"/></g><g fill="#fff"><circle cx="11.5" cy="32" r="6.5"/><circle cx="52.5" cy="32" r="2.95"/><circle cx="32" cy="52.5" r="4.6"/></g><circle cx="11.5" cy="32" r="3.1" fill="#111"/><path d="M32 21.75a5.125 5.125 0 0 1 0 10.25a5.125 5.125 0 0 0 0 10.25a10.25 10.25 0 0 0 0-20.5z" fill="#111"/><g fill="none" stroke="#111" stroke-width="0.1"><circle cx="32" cy="32" r="30.8"/><circle cx="32" cy="11.5" r="10.25"/><circle cx="11.5" cy="32" r="10.25"/><circle cx="52.5" cy="32" r="10.25"/><circle cx="32" cy="52.5" r="10.25"/><circle cx="32" cy="32" r="10.25"/></g></svg>
+      <span class="app-title-text">眼师五行八识图演示工具</span>
+      <span class="app-badge">历史版本索引</span>
+    </h1>
+    <p class="app-subtitle">左侧选择版本与文件类型，右侧内嵌预览。</p>
+  </header>
+
+  <main class="app-main">
+    <aside class="version-panel">
+      <div class="panel-head">
+        <input id="searchInput" class="search-input" type="search" placeholder="搜索版本或特性…" aria-label="搜索版本">
+      </div>
+      <ul class="version-list" id="versionList"></ul>
+      <div class="panel-foot" id="panelFoot"></div>
+    </aside>
+
+    <section class="preview-panel">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <button id="btnOlder" class="tool-btn" type="button" title="更早版本">← 更早</button>
+          <button id="btnNewer" class="tool-btn" type="button" title="更晚版本">更晚 →</button>
+          <span class="current-name" id="currentName">—</span>
+        </div>
+        <div class="toolbar-right">
+          <div class="variant-switch" id="variantSwitch" role="group" aria-label="文件类型">
+            <button class="variant-btn active" type="button" data-variant="base">基础版</button>
+            <button class="variant-btn" type="button" data-variant="font">内嵌字体版</button>
+          </div>
+          <button id="btnAuto" class="tool-btn" type="button" title="自动轮播">自动遍历</button>
+          <button id="btnReload" class="tool-btn" type="button" title="重新加载当前版本">刷新</button>
+          <button id="btnOpen" class="tool-btn" type="button" title="在新窗口打开当前版本">新窗口</button>
+        </div>
+      </div>
+
+      <div class="frame-wrap">
+        <iframe id="previewFrame" class="preview-frame" title="历史版本预览"></iframe>
+        <div class="loading-mask" id="loadingMask">
+          <div class="spinner"></div>
+          <p class="loading-text" id="loadingText">正在加载…</p>
+          <p class="loading-hint" id="loadingHint"></p>
+        </div>
+      </div>
+
+      <div class="info-bar" id="infoBar"></div>
+    </section>
+  </main>
+
+<script>
+/* ==========================================================================
+   版本清单
+   --------------------------------------------------------------------------
+   新增历史版本时，在 VERSIONS 数组最前面插入一条即可（保持「新 → 旧」顺序）：
+     { version: 'v1.12', date: '2026-11-20', highlights: ['…'],
+       files: { base: { path: '眼师…v1.12.html', size: 123456 },
+                font: { path: '眼师…v1.12(内嵌字体版).html', size: 1234567 } } }
+   path 为相对 index.html 的路径；size 仅用于展示，可省略。
+   ========================================================================== */
+const HIST = 'histroy/';
+const VERSIONS = [
+  {
+    version: 'v1.11',
+    date: '2026-11-15',
+    highlights: '新增河图/ 洛书 / 围棋 / 画板分组、画板笔迹置顶、透明背景默认开启；内嵌版含小篆字体。',
+    files: {
+      base: { path: '眼师五行八识图演示工具v1.11.html', size: 403296 },
+      font: { path: '眼师五行八识图演示工具v1.11(内嵌字体版).html', size: 18272316 },
+    },
+  },
+  {
+    version: 'v1.10',
+    date: '2026-11-15',
+    highlights: '新增六十四卦方圆图（圆图 / 方图、先天与后天卦序、反转与重卦标红）、田字格文字居中显示；内嵌版含小篆字体。',
+    files: {
+      base: { path: HIST + '眼师五行八识图演示工具v1.10.html', size: 337709 },
+      font: { path: HIST + '眼师五行八识图演示工具v1.10(内嵌字体版).html', size: 18212408 },
+    },
+  },
+  {
+    version: 'v1.9',
+    date: '2026-11-14',
+    highlights: '新增内容模板（繁体 / 简体）与角度显示、导出图像完善、内环虚线等细节调整。',
+    files: {
+      base: { path: HIST + '眼师五行八识图演示工具v1.9.html', size: 288837 },
+      font: { path: HIST + '眼师五行八识图演示工具v1.9(内嵌字体版).html', size: 18163536 },
+    },
+  },
+  {
+    version: 'v1.8',
+    date: '2026-11-14',
+    highlights: '新增导出图像、内环虚线、文字显示设置（系统/常规/中粗/特粗字重与黑、白、红等颜色）；自此开始提供内嵌字体版。',
+    files: {
+      base: { path: HIST + '眼师五行八识图演示工具v1.8.html', size: 269098 },
+      font: { path: HIST + '眼师五行八识图演示工具v1.8(内嵌字体版).html', size: 18143804 },
+    },
+  },
+  {
+    version: 'v1.7',
+    date: '2026-11-13',
+    highlights: '新增田字格（十字线 / 撇捺线、加粗、竖线标红、内接大圆）、左右旋 ±1° 微调；标题更名为「眼师五行八识图演示工具」。',
+    files: {
+      base: { path: HIST + '眼师五行八识图演示工具v1.7.html', size: 244936 },
+    },
+  },
+  {
+    version: 'v1.6',
+    date: '2026-11-13',
+    highlights: '新增「大圆整体」控制与虚线显示选项，独立元素控制并入全局面板。',
+    files: {
+      base: { path: HIST + '眼师五行八识图演示工具v1.6.html', size: 222842 },
+    },
+  },
+  {
+    version: 'v1.5',
+    date: '2026-11-12',
+    highlights: '背景模式与主题外观细节优化，未新增面板选项。',
+    files: {
+      base: { path: HIST + '眼师五行八识图演示工具v1.5.html', size: 207268 },
+    },
+  },
+  {
+    version: 'v1.4',
+    date: '2026-11-12',
+    highlights: '新增图像区设置：透明背景、图像区背景、透明度、去除边框与阴影，以及「禅」关键词与还原设置。',
+    files: {
+      base: { path: HIST + '眼师五行八识图演示工具v1.4.html', size: 202871 },
+    },
+  },
+  {
+    version: 'v1.3',
+    date: '2026-11-11',
+    highlights: '新增背景设置（随机、螺旋、星系旋臂、流场漂移、呼吸聚散、曼陀罗环、浪潮等 7 种模式、自动切换与间隔）及显示字体（黑体 / 宋体 / 楷体 / 仿宋 / 隶书 / 等宽）。',
+    files: {
+      base: { path: HIST + '眼师五行八识图演示工具v1.3.html', size: 188316 },
+    },
+  },
+  {
+    version: 'v1.2',
+    date: '2026-11-11',
+    highlights: '新增主题外观（亮色 / 暗色）切换与「设置」面板。',
+    files: {
+      base: { path: HIST + '眼师五行八识图演示工具v1.2.html', size: 158839 },
+    },
+  },
+  {
+    version: 'v1.1',
+    date: '2026-11-10',
+    highlights: '初版：中心阴阳鱼 + 上下左右四圆环，支持整体旋转、独立元素转速 / 变速、边线与虚线控制。',
+    files: {
+      base: { path: HIST + '眼师五行八识图演示工具v1.1.html', size: 153291 },
+    },
+  },
+];
+
+const VARIANT_LABELS = { base: '基础版', font: '内嵌字体版' };
+const AUTO_INTERVAL = 8000;
+
+const state = {
+  index: 0,
+  variant: 'base',
+  keyword: '',
+  auto: false,
+  autoTimer: null,
+};
+
+const listEl = document.getElementById('versionList');
+const footEl = document.getElementById('panelFoot');
+const searchEl = document.getElementById('searchInput');
+const frameEl = document.getElementById('previewFrame');
+const maskEl = document.getElementById('loadingMask');
+const maskTextEl = document.getElementById('loadingText');
+const maskHintEl = document.getElementById('loadingHint');
+const currentNameEl = document.getElementById('currentName');
+const infoBarEl = document.getElementById('infoBar');
+const btnOlder = document.getElementById('btnOlder');
+const btnNewer = document.getElementById('btnNewer');
+const btnAuto = document.getElementById('btnAuto');
+const btnReload = document.getElementById('btnReload');
+const btnOpen = document.getElementById('btnOpen');
+const variantBtns = Array.from(document.querySelectorAll('.variant-btn'));
+
+/* ---------- 工具函数 ---------- */
+function formatSize(bytes) {
+  if (!Number.isFinite(bytes)) return '—';
+  if (bytes >= 1024 * 1024) return (bytes / 1024 / 1024).toFixed(1) + 'MB';
+  return Math.round(bytes / 1024) + 'KB';
+}
+
+// 中文文件名与括号统一编码，兼容 file:// 与 http:// 两种打开方式
+function fileUrl(file) {
+  return encodeURI(file.path);
+}
+
+function entryOf(i) { return VERSIONS[i]; }
+
+function fileOf(i, variant) {
+  const v = entryOf(i);
+  return v.files[variant] || v.files.base;
+}
+
+function matchedEntries() {
+  const kw = state.keyword.trim().toLowerCase();
+  return VERSIONS
+    .map((v, i) => ({ v, i }))
+    .filter(({ v }) => {
+      if (!kw) return true;
+      const text = (v.version + ' ' + v.date + ' ' + v.highlights).toLowerCase();
+      return text.indexOf(kw) !== -1;
+    });
+}
+
+/* ---------- 渲染版本列表 ---------- */
+function renderList() {
+  const rows = matchedEntries();
+  listEl.innerHTML = '';
+
+  if (!rows.length) {
+    const li = document.createElement('li');
+    li.className = 'empty-tip';
+    li.textContent = '没有匹配的版本';
+    listEl.appendChild(li);
+    return;
+  }
+
+  rows.forEach(({ v, i }) => {
+    const li = document.createElement('li');
+    li.className = 'version-item' + (i === state.index ? ' active' : '');
+    li.dataset.index = String(i);
+
+    const head = document.createElement('div');
+    head.className = 'version-head';
+    const name = document.createElement('span');
+    name.className = 'version-name';
+    name.textContent = v.version;
+    const date = document.createElement('span');
+    date.className = 'version-date';
+    date.textContent = v.date;
+    head.appendChild(name);
+    head.appendChild(date);
+
+    const hl = document.createElement('p');
+    hl.className = 'version-highlights';
+    hl.textContent = v.highlights || '';
+
+    const files = document.createElement('div');
+    files.className = 'version-files';
+    Object.keys(VARIANT_LABELS).forEach(variant => {
+      const f = v.files[variant];
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'file-chip' + (i === state.index && variant === state.variant ? ' active' : '');
+      btn.dataset.index = String(i);
+      btn.dataset.variant = variant;
+      btn.textContent = f
+        ? VARIANT_LABELS[variant] + ' · ' + formatSize(f.size)
+        : VARIANT_LABELS[variant] + ' · 无';
+      if (!f) { btn.disabled = true; btn.classList.add('is-missing'); }
+      files.appendChild(btn);
+    });
+
+    li.appendChild(head);
+    li.appendChild(hl);
+    li.appendChild(files);
+    listEl.appendChild(li);
+  });
+
+  footEl.textContent = '共 ' + VERSIONS.length + ' 个版本 · ' + rows.length + ' 条匹配';
+
+  const active = listEl.querySelector('.version-item.active');
+  if (active) active.scrollIntoView({ block: 'nearest' });
+}
+
+/* ---------- 渲染信息栏 ---------- */
+function renderInfo() {
+  const v = entryOf(state.index);
+  const f = fileOf(state.index, state.variant);
+  currentNameEl.textContent = v.version + ' · ' + VARIANT_LABELS[state.variant];
+
+  infoBarEl.innerHTML = '';
+  const items = [
+    ['日期', v.date],
+    ['文件', f ? formatSize(f.size) : '缺失'],
+    ['路径', f ? f.path : '—', 'path'],
+  ];
+  items.forEach(([label, value, kind]) => {
+    const span = document.createElement('span');
+    span.className = 'info-item';
+    const lab = document.createElement('span');
+    lab.className = 'info-label';
+    lab.textContent = label;
+    const val = document.createElement('span');
+    val.className = kind === 'path' ? 'info-path' : '';
+    val.textContent = value;
+    span.appendChild(lab);
+    span.appendChild(val);
+    infoBarEl.appendChild(span);
+  });
+
+  btnOlder.disabled = state.index >= VERSIONS.length - 1;
+  btnNewer.disabled = state.index <= 0;
+
+  variantBtns.forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.variant === state.variant);
+    const target = v.files[btn.dataset.variant];
+    btn.disabled = !target;
+  });
+}
+
+/* ---------- 加载预览 ---------- */
+function loadPreview(reason) {
+  const v = entryOf(state.index);
+  const f = fileOf(state.index, state.variant);
+  if (!f) return;
+
+  maskTextEl.textContent = '正在加载 ' + v.version + ' · ' + VARIANT_LABELS[state.variant];
+  maskHintEl.textContent = f.size > 5 * 1024 * 1024
+    ? '文件较大（' + formatSize(f.size) + '），首次加载可能需要数秒'
+    : '';
+  maskEl.classList.add('is-visible');
+
+  // 先清空再赋值，确保「刷新」也能真正重新加载
+  frameEl.src = 'about:blank';
+  setTimeout(() => {
+    frameEl.src = fileUrl(f) + (reason === 'reload' ? '?t=' + Date.now() : '');
+  }, 40);
+}
+
+frameEl.addEventListener('load', () => {
+  if (!frameEl.src || frameEl.src === 'about:blank') return;
+  maskEl.classList.remove('is-visible');
+});
+
+/* ---------- 选择与遍历 ---------- */
+function select(index, variant, options) {
+  if (index < 0 || index >= VERSIONS.length) return;
+  const opts = options || {};
+  const prevIndex = state.index;
+  const prevVariant = state.variant;
+
+  if (opts.keepVariant !== true) {
+    state.variant = variant && entryOf(index).files[variant] ? variant : 'base';
+  } else if (!entryOf(index).files[state.variant]) {
+    state.variant = 'base';
+  }
+
+  state.index = index;
+  renderList();
+  renderInfo();
+
+  if (prevIndex !== state.index || prevVariant !== state.variant || opts.force) {
+    loadPreview(opts.reason);
+  }
+  if (state.auto) restartAuto();
+}
+
+function step(delta) {
+  const next = state.index + delta;
+  if (next < 0 || next >= VERSIONS.length) return;
+  select(next, state.variant, { keepVariant: true });
+}
+
+/* ---------- 自动遍历 ---------- */
+function startAuto() {
+  state.auto = true;
+  btnAuto.classList.add('is-on');
+  btnAuto.textContent = '自动遍历中';
+  restartAuto();
+  if (state.index >= VERSIONS.length - 1) select(0, state.variant, { keepVariant: true });
+}
+
+function stopAuto() {
+  state.auto = false;
+  btnAuto.classList.remove('is-on');
+  btnAuto.textContent = '自动遍历';
+  if (state.autoTimer) {
+    clearInterval(state.autoTimer);
+    state.autoTimer = null;
+  }
+}
+
+function restartAuto() {
+  if (state.autoTimer) clearInterval(state.autoTimer);
+  state.autoTimer = setInterval(() => {
+    const next = state.index + 1;
+    select(next >= VERSIONS.length ? 0 : next, state.variant, { keepVariant: true });
+  }, AUTO_INTERVAL);
+}
+
+function toggleAuto() {
+  if (state.auto) stopAuto();
+  else startAuto();
+}
+
+/* ---------- 事件绑定 ---------- */
+listEl.addEventListener('click', e => {
+  const chip = e.target.closest('.file-chip');
+  if (chip && !chip.disabled) {
+    select(Number(chip.dataset.index), chip.dataset.variant);
+    return;
+  }
+  const item = e.target.closest('.version-item');
+  if (!item) return;
+  select(Number(item.dataset.index), state.variant, { keepVariant: true });
+});
+
+searchEl.addEventListener('input', () => {
+  state.keyword = searchEl.value;
+  renderList();
+});
+
+btnOlder.addEventListener('click', () => step(1));
+btnNewer.addEventListener('click', () => step(-1));
+btnAuto.addEventListener('click', toggleAuto);
+btnReload.addEventListener('click', () => loadPreview('reload'));
+btnOpen.addEventListener('click', () => {
+  const f = fileOf(state.index, state.variant);
+  if (f) window.open(fileUrl(f), '_blank');
+});
+
+variantBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (btn.disabled) return;
+    select(state.index, btn.dataset.variant, { force: true });
+  });
+});
+
+/* ---------- 初始化 ---------- */
+renderList();
+renderInfo();
+loadPreview();
+</script>
+</body>
+</html>

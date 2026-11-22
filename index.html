@@ -192,6 +192,7 @@
           <div class="variant-switch" id="variantSwitch" role="group" aria-label="文件类型">
             <button class="variant-btn active" type="button" data-variant="base">基础版</button>
             <button class="variant-btn" type="button" data-variant="font">内嵌字体版</button>
+            <button class="variant-btn" type="button" data-variant="web">网页版</button>
           </div>
           <button id="btnAuto" class="tool-btn" type="button" title="自动轮播">自动遍历</button>
           <button id="btnReload" class="tool-btn" type="button" title="重新加载当前版本">刷新</button>
@@ -225,12 +226,32 @@
 const HIST = 'histroy/';
 const VERSIONS = [
   {
+    version: 'v1.15',
+    date: '2026-11-22',
+    highlights: '图层能力增强：图层标题支持拖拽排序（拖拽手柄 + 虚线占位提示），新建图层插入到目标图层上方，新增图层向上/向下合并按钮，「存为模板」置灰状态随图层笔迹实时同步。',
+    files: {
+      base: { path: '眼师五行八识图演示工具v1.15.html', size: 573161 },
+      font: { path: '眼师五行八识图演示工具v1.15(内嵌字体版).html', size: 18448521 },
+      web: { path: '眼师五行八识图演示工具v1.15(网页版).html', size: 573427 },
+    },
+  },
+  {
+    version: 'v1.14',
+    date: '2026-11-21',
+    highlights: '背景设置布局优化：「最大数量」「选取模式」「显示模式」三个控件宽度统一，「选取模式」单独成行放在「最大数量」下方；显示模式切换为「黑客帝国」时自动隐藏「生灭渐变」整行，切回其他模式时恢复。',
+    files: {
+      base: { path: HIST + '眼师五行八识图演示工具v1.14.html', size: 509619 },
+      font: { path: HIST + '眼师五行八识图演示工具v1.14(内嵌字体版).html', size: 18384979 },
+      web: { path: HIST + '眼师五行八识图演示工具v1.14(网页版).html', size: 509885 },
+    },
+  },
+  {
     version: 'v1.13',
     date: '2026-11-21',
     highlights: '新增八卦图分组：阴阳鱼、五行、内卦、外卦、天干、地支、节气七层，各层支持角度 / 转速 / 反向 / 边线 / 分线 / 虚线；五行支持方位模式（四等分、土居中央）；五行八识图四环与中心阴阳鱼新增透明度调节。',
     files: {
-      base: { path: '眼师五行八识图演示工具v1.13.html', size: 508828 },
-      font: { path: '眼师五行八识图演示工具v1.13(内嵌字体版).html', size: 18384188 },
+      base: { path: HIST + '眼师五行八识图演示工具v1.13.html', size: 509126 },
+      font: { path: HIST + '眼师五行八识图演示工具v1.13(内嵌字体版).html', size: 18384486 },
     },
   },
   {
@@ -238,8 +259,8 @@ const VERSIONS = [
     date: '2026-11-15',
     highlights: '新增「显示顺序」面板：可拖拽调整控制面板分组与图层绘制顺序，支持重置默认与保存；内嵌版含小篆字体。',
     files: {
-      base: { path: '眼师五行八识图演示工具v1.12.html', size: 425196 },
-      font: { path: '眼师五行八识图演示工具v1.12(内嵌字体版).html', size: 18293973 },
+      base: { path: HIST + '眼师五行八识图演示工具v1.12.html', size: 425196 },
+      font: { path: HIST + '眼师五行八识图演示工具v1.12(内嵌字体版).html', size: 18293973 },
     },
   },
   {
@@ -336,7 +357,7 @@ const VERSIONS = [
   },
 ];
 
-const VARIANT_LABELS = { base: '基础版', font: '内嵌字体版' };
+const VARIANT_LABELS = { base: '基础版', font: '内嵌字体版', web: '网页版' };
 const AUTO_INTERVAL = 8000;
 
 const state = {

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -62,6 +62,8 @@
     --btn-active-bg: #333;
     --shadow: 0 2px 12px rgba(0,0,0,.08);
     --knob-shadow: 0 1px 3px rgba(0,0,0,.3);
+    --pin-bg: #fffbea;
+    --pin-border: #ffd98a;
   }
   [data-theme="dark"] {
     color-scheme: dark;
@@ -84,6 +86,8 @@
     --btn-active-bg: #3d8bff;
     --shadow: 0 2px 12px rgba(0,0,0,.5);
     --knob-shadow: 0 1px 3px rgba(0,0,0,.6);
+    --pin-bg: #3a3320;
+    --pin-border: #7a6320;
   }
   body {
     font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
@@ -1118,11 +1122,13 @@
   }
   .modal-mask.show { display: flex; }
   .modal {
-    background: #fff; border-radius: 10px; box-shadow: 0 12px 40px rgba(0,0,0,.18);
+    background: var(--panel-bg); color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 10px; box-shadow: 0 12px 40px rgba(0,0,0,.18);
     width: 380px; max-width: 92vw; max-height: 80vh; display: flex; flex-direction: column;
     overflow: hidden;
   }
-  .modal-head { padding: 14px 18px; border-bottom: 1px solid #eef0f4; display: flex; justify-content: space-between; align-items: center; }
+  .modal-head { padding: 14px 18px; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; }
   .modal-title { font-size: 15px; font-weight: 600; color: var(--text-strong); }
   .modal-close { border: none; background: transparent; padding: 4px 8px; cursor: pointer;
     color: var(--text-muted); font-size: 18px; line-height: 1; border-radius: 4px;
@@ -1132,27 +1138,27 @@
   .reorder-item {
     display: flex; align-items: center; gap: 10px; padding: 8px 10px;
     border: 1px solid var(--border-light); border-radius: 7px; margin-bottom: 6px;
-    background: #fafbfc;
+    background: var(--panel-bg-alt);
   }
   .reorder-item:last-child { margin-bottom: 0; }
-  .reorder-item.dragging { opacity: .5; background: var(--accent-bg); border-color: #b3d7ff; }
-  .reorder-item.pinned { border-color: #ffd98a; background: #fffbea; }
-  .reorder-section-head { padding: 6px 4px 4px; font-size: 12px; font-weight: 600; color: #8a9099; letter-spacing: .3px; }
-  .reorder-section-sep { height: 1px; background: #eef0f4; margin: 10px 4px; }
-  .reorder-grip { color: #b7bcc6; font-size: 18px; user-select: none; line-height: 1; cursor: grab; }
+  .reorder-item.dragging { opacity: .5; background: var(--accent-bg); border-color: var(--accent); }
+  .reorder-item.pinned { border-color: var(--pin-border); background: var(--pin-bg); }
+  .reorder-section-head { padding: 6px 4px 4px; font-size: 12px; font-weight: 600; color: var(--text-muted); letter-spacing: .3px; }
+  .reorder-section-sep { height: 1px; background: var(--border-light); margin: 10px 4px; }
+  .reorder-grip { color: var(--text-muted); opacity: .65; font-size: 18px; user-select: none; line-height: 1; cursor: grab; }
   .reorder-label { flex: 1; font-size: 13.5px; color: var(--text-strong); font-weight: 500; }
   .reorder-btns { display: flex; gap: 4px; }
   .reorder-btns button {
     padding: 3px 6px; min-height: 26px; min-width: 26px;
     font-size: 0; border-radius: 5px;
-    border: 1px solid var(--border); background: #fff; color: var(--text-sub); cursor: pointer;
+    border: 1px solid var(--border); background: var(--panel-bg); color: var(--text-sub); cursor: pointer;
     display: inline-flex; align-items: center; justify-content: center;
   }
   .reorder-btns button svg { width: 14px; height: 14px; }
   .reorder-btns button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
   .reorder-btns button:disabled { opacity: .35; cursor: not-allowed; }
   .modal-foot {
-    padding: 12px 18px; border-top: 1px solid #eef0f4;
+    padding: 12px 18px; border-top: 1px solid var(--border-light);
     display: flex; gap: 8px; justify-content: space-between;
   }
   .modal-foot button { padding: 7px 16px; font-size: 13px; min-height: 34px; }
@@ -1165,6 +1171,8 @@
     color: var(--text); word-break: break-word;
   }
 </style>
+  <!-- 网页版：外链小篆字体，不内嵌 -->
+  <link rel="stylesheet" href="font-family/chongxi/result.css">
 </head>
 <body>
 
@@ -1686,6 +1694,7 @@
               <option value="song">宋体</option>
               <option value="kai">楷体</option>
               <option value="fangsong">仿宋</option>
+              <option value="zt">小篆</option>
             </select>
             <select id="tianTextWeight" class="weight-select" aria-label="粗细">
               <option value="300">细</option>
@@ -2535,6 +2544,7 @@
           <option value="song">宋体</option>
           <option value="kai">楷体</option>
           <option value="fangsong">仿宋</option>
+          <option value="zt">小篆</option>
         </select>
         <select id="kwWeight" class="weight-select" aria-label="粗细">
           <option value="300">细</option>
@@ -3033,7 +3043,7 @@ function reorderUnpin(key) {
 // 模态框内 tab-btn 样式（简单 inline 不够，给个 CSS 类）
 const modalStyle = document.createElement('style');
 modalStyle.textContent = `
-  .tab-btn { padding: 5px 12px; min-height: 28px; font-size: 13px; border: 1px solid var(--border); background: #fff; color: var(--text-sub); border-radius: 5px; cursor: pointer; }
+  .tab-btn { padding: 5px 12px; min-height: 28px; font-size: 13px; border: 1px solid var(--border); background: var(--panel-bg); color: var(--text-sub); border-radius: 5px; cursor: pointer; }
   .tab-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 `;
 document.head.appendChild(modalStyle);
@@ -6363,6 +6373,7 @@ const BG_FONTS = {
   song: 'SimSun, "Songti SC", "STSong", serif',
   kai: 'KaiTi, "Kaiti SC", "STKaiti", serif',
   fangsong: 'FangSong, "STFangsong", serif',
+  zt: '"Chong Xi Small Seal", KaiTi, "Kaiti SC", serif',
 };
 
 // 代码雨：单个汉字竖排成列，字符取自背景关键词，黑白灰渐变

@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>眼师五行八识图演示工具v1.13</title>
+<title>眼师五行八识图演示工具v1.15</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzAuOCIgZmlsbD0iI2ZmZiIvPjxnIGZpbGw9IiNmZmYiPjxjaXJjbGUgY3g9IjMyIiBjeT0iMTEuNSIgcj0iMTAuMjUiLz48Y2lyY2xlIGN4PSIxMS41IiBjeT0iMzIiIHI9IjEwLjI1Ii8+PGNpcmNsZSBjeD0iNTIuNSIgY3k9IjMyIiByPSIxMC4yNSIvPjxjaXJjbGUgY3g9IjMyIiBjeT0iNTIuNSIgcj0iMTAuMjUiLz48Y2lyY2xlIGN4PSIzMiIgY3k9IjMyIiByPSIxMC4yNSIvPjwvZz48ZyBmaWxsPSIjMTExIj48Y2lyY2xlIGN4PSIzMiIgY3k9IjExLjUiIHI9IjQuNzUiLz48Y2lyY2xlIGN4PSIxMS41IiBjeT0iMzIiIHI9IjEwLjI1Ii8+PGNpcmNsZSBjeD0iNTIuNSIgY3k9IjMyIiByPSI2Ljc1Ii8+PGNpcmNsZSBjeD0iMzIiIGN5PSI1Mi41IiByPSIxMC4yNSIvPjwvZz48ZyBmaWxsPSIjZmZmIj48Y2lyY2xlIGN4PSIxMS41IiBjeT0iMzIiIHI9IjYuNSIvPjxjaXJjbGUgY3g9IjUyLjUiIGN5PSIzMiIgcj0iMi45NSIvPjxjaXJjbGUgY3g9IjMyIiBjeT0iNTIuNSIgcj0iNC42Ii8+PC9nPjxjaXJjbGUgY3g9IjExLjUiIGN5PSIzMiIgcj0iMy4xIiBmaWxsPSIjMTExIi8+PHBhdGggZD0iTTMyIDIxLjc1YTUuMTI1IDUuMTI1IDAgMCAxIDAgMTAuMjVhNS4xMjUgNS4xMjUgMCAwIDAgMCAxMC4yNWExMC4yNSAxMC4yNSAwIDAgMCAwLTIwLjV6IiBmaWxsPSIjMTExIi8+PGcgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMTExIiBzdHJva2Utd2lkdGg9IjAuMSI+PGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzAuOCIvPjxjaXJjbGUgY3g9IjMyIiBjeT0iMTEuNSIgcj0iMTAuMjUiLz48Y2lyY2xlIGN4PSIxMS41IiBjeT0iMzIiIHI9IjEwLjI1Ii8+PGNpcmNsZSBjeD0iNTIuNSIgY3k9IjMyIiByPSIxMC4yNSIvPjxjaXJjbGUgY3g9IjMyIiBjeT0iNTIuNSIgcj0iMTAuMjUiLz48Y2lyY2xlIGN4PSIzMiIgY3k9IjMyIiByPSIxMC4yNSIvPjwvZz48L3N2Zz4K">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -62,6 +62,8 @@
     --btn-active-bg: #333;
     --shadow: 0 2px 12px rgba(0,0,0,.08);
     --knob-shadow: 0 1px 3px rgba(0,0,0,.3);
+    --pin-bg: #fffbea;
+    --pin-border: #ffd98a;
   }
   [data-theme="dark"] {
     color-scheme: dark;
@@ -84,6 +86,8 @@
     --btn-active-bg: #3d8bff;
     --shadow: 0 2px 12px rgba(0,0,0,.5);
     --knob-shadow: 0 1px 3px rgba(0,0,0,.6);
+    --pin-bg: #3a3320;
+    --pin-border: #7a6320;
   }
   body {
     font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
@@ -264,7 +268,8 @@
   }
   body.draw-active #drawCanvas {
     pointer-events: auto;
-    cursor: crosshair;
+    /* 画笔光标：铅笔笔尖朝左下，热点在笔尖 (4,22) */
+    cursor: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSg0LjIgMjEuOCkgcm90YXRlKDQ1KSI+PHJlY3QgeD0iLTMuNCIgeT0iLTIwLjUiIHdpZHRoPSI2LjgiIGhlaWdodD0iMTUiIHJ4PSIwLjYiIGZpbGw9IiMyYjJiMmIiIHN0cm9rZT0iI2ZmZmZmZiIgc3Ryb2tlLXdpZHRoPSIxLjIiLz48cmVjdCB4PSItMy40IiB5PSItMjAuNSIgd2lkdGg9IjYuOCIgaGVpZ2h0PSI0LjIiIHJ4PSIwLjYiIGZpbGw9IiNkOGQ4ZDgiIHN0cm9rZT0iI2ZmZmZmZiIgc3Ryb2tlLXdpZHRoPSIxLjIiLz48cGF0aCBkPSJNMCAwIEwtMy40IC02LjIgTDMuNCAtNi4yIFoiIGZpbGw9IiNmNWY1ZjUiIHN0cm9rZT0iIzJiMmIyYiIgc3Ryb2tlLXdpZHRoPSIxLjMiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48cGF0aCBkPSJNMCAwIEwtMS4zNSAtMi42IEwxLjM1IC0yLjYgWiIgZmlsbD0iIzJiMmIyYiIvPjwvZz48L3N2Zz4=") 4 22, crosshair;
   }
   #drawBorderOverlay {
     position: absolute;
@@ -278,6 +283,44 @@
     border: 1px solid #999;
   }
   #drawBorderOverlay.visible { display: block; }
+  /* 调整最后一笔：虚线辅助框与拖拽层，不拦截指针事件 */
+  #drawAdjustOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    display: none;
+    z-index: 3;
+  }
+  .mini-btn.adjust-btn.active {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: var(--accent-bg);
+  }
+  body.adjust-on #drawCanvas { cursor: move; }
+  body.adjust-on.adjust-dragging #drawCanvas { cursor: grabbing; }
+  /* 橡皮圆形光标：直径为当前图层橡皮笔迹直径 */
+  #eraserCursor {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 0;
+    height: 0;
+    box-sizing: border-box;
+    border: 1px solid rgba(0,0,0,.6);
+    border-radius: 50%;
+    background: rgba(255,255,255,.3);
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    display: none;
+    z-index: 60;
+  }
+  #eraserCursor.visible { display: block; }
+  body.draw-active.eraser-active #drawCanvas { cursor: none; }
+  /* 当前图层已隐藏等无可绘制图层时，画笔光标回落为普通指针 */
+  body.draw-active.draw-no-layer #drawCanvas { cursor: default; }
 
   /* 图像区设置：去除边框与阴影 */
   body.canvas-no-chrome .canvas-wrap {
@@ -443,6 +486,13 @@
     border-color: var(--danger);
   }
   button.danger:hover { background: var(--danger-hover); color: #fff; }
+  button.danger:disabled, button.danger:disabled:hover {
+    background: var(--control-off);
+    border-color: var(--control-off);
+    color: #fff;
+    opacity: .55;
+    cursor: not-allowed;
+  }
   button.btn-secondary {
     background: #eef4ff;
     color: #1677ff;
@@ -498,6 +548,8 @@
     background: var(--panel-bg);
     color: var(--text);
   }
+  /* 图层颜色仅影响收起时的选中项，展开列表保持主题文字颜色 */
+  #drawLayerCards [data-color] option { color: var(--text); }
   /* 卦序行的配置按钮与下拉同高 */
   #fyCircleOrderCfg,
   #fySquareOrderCfg,
@@ -725,6 +777,13 @@
     font-size: 12px;
     border-radius: 4px;
   }
+  /* 显示模式、最大数量、选取模式三者宽度一致 */
+  #bgGroup #kwMode,
+  #bgGroup #kwMax,
+  #bgGroup #kwPick {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
   .kw-actions {
     display: flex;
     align-items: center;
@@ -783,6 +842,107 @@
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     gap: 12px;
   }
+  /* 单独成行的卡片（如画板「通用」区） */
+  .element-card-standalone { margin-bottom: 12px; }
+  /* 图层卡片：当前层高亮 */
+  .layer-card.active { border-color: var(--accent); }
+  /* 图层卡片：拖动标题调整顺序 */
+  .layer-card > .header { cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; }
+  .layer-card.dragging {
+    opacity: .92;
+    border-color: var(--accent);
+    box-shadow: 0 10px 24px rgba(0,0,0,.22);
+    cursor: grabbing;
+  }
+  /* 拖拽时的落位占位框：虚线高亮，明确拖放位置 */
+  .layer-drop-placeholder {
+    border: 1px dashed var(--accent);
+    border-radius: 6px;
+    background: var(--accent-bg);
+    opacity: .55;
+    box-sizing: border-box;
+    pointer-events: none;
+  }
+  .layer-card.dragging > .header { cursor: grabbing; }
+  .layer-title { display: inline-flex; align-items: center; gap: 4px; }
+  .layer-title .drag-grip { width: 12px; height: 16px; flex: 0 0 auto; color: var(--text-muted); }
+
+  /* 画板模板生成浮层：左侧分类、右侧模板 */
+  .draw-tpl-pop {
+    position: fixed;
+    z-index: 80;
+    display: flex;
+    width: 340px;
+    max-width: calc(100vw - 24px);
+    max-height: 300px;
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .draw-tpl-pop[hidden] { display: none; }
+  .draw-tpl-cats {
+    flex: 0 0 84px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 6px;
+    border-right: 1px solid var(--border-light);
+    background: var(--panel-bg-alt);
+  }
+  .draw-tpl-cat {
+    padding: 7px 4px;
+    border: none;
+    border-radius: 6px;
+    background: none;
+    font-family: inherit;
+    font-size: 12.5px;
+    color: var(--text-tab);
+    cursor: pointer;
+    transition: background .15s, color .15s;
+  }
+  .draw-tpl-cat:hover { background: var(--hover-bg); color: var(--text); }
+  .draw-tpl-cat.active { background: var(--accent-bg); color: var(--accent); font-weight: 600; }
+  .draw-tpl-list {
+    flex: 1;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+    padding: 8px;
+    overflow-y: auto;
+    align-content: start;
+  }
+  .draw-tpl-item {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 4px;
+    border: 1px solid var(--border-light);
+    border-radius: 6px;
+    background: var(--panel-bg);
+  }
+  .draw-tpl-item:hover { border-color: var(--accent); }
+  .draw-tpl-thumb {
+    height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-strong);
+  }
+  .draw-tpl-thumb svg { width: 100%; height: 100%; display: block; }
+  .draw-tpl-name {
+    font-size: 12px;
+    text-align: center;
+    color: var(--text-sub);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .draw-tpl-item .mini-btn { width: 100%; }
+  .draw-tpl-actions { display: flex; gap: 4px; }
+  .draw-tpl-actions .mini-btn { flex: 1; width: auto; }
   .element-card {
     border: 1px solid var(--border-light);
     border-radius: 6px;
@@ -880,6 +1040,22 @@
     transition: border-color .15s;
   }
   .text-row .text-input:focus { border-color: var(--accent); }
+  /* 图层名称输入框 */
+  .layer-name-input {
+    flex: 1;
+    min-width: 0;
+    height: 24px;
+    padding: 0 6px;
+    font-family: inherit;
+    font-size: 12px;
+    color: var(--text);
+    background: var(--panel-bg-alt);
+    border: 1px solid var(--control-off);
+    border-radius: 4px;
+    outline: none;
+    transition: border-color .15s;
+  }
+  .layer-name-input:focus { border-color: var(--accent); }
   .text-row .font-select,
   .text-row .weight-select,
   .text-row .size-select,
@@ -979,6 +1155,32 @@
     color: var(--accent);
     border-color: var(--accent);
   }
+  .mini-btn:disabled, .mini-btn:disabled:hover {
+    color: var(--text-muted);
+    border-color: var(--control-off);
+    opacity: .5;
+    cursor: not-allowed;
+  }
+  /* 操作按钮行：每行四个按钮，超出换行显示（图层卡片与画板通用区共用） */
+  .layer-actions { flex-wrap: wrap; gap: 6px; }
+  .layer-actions .mini-btn { flex: 0 0 calc(25% - 5px); padding: 0 4px; font-size: 11px; white-space: nowrap; }
+  /* 存为模板浮层：分类与名称输入 */
+  #tplSaveMask .modal-body { display: flex; flex-direction: column; gap: 12px; padding: 14px 12px; }
+  .tpl-save-row { display: flex; align-items: center; gap: 10px; }
+  .tpl-save-row label { flex: 0 0 40px; font-size: 13px; color: var(--text-sub); }
+  .tpl-save-row select, .tpl-save-row input {
+    flex: 1;
+    min-width: 0;
+    height: 32px;
+    padding: 0 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--panel-bg);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
+  }
+  .draw-tpl-empty { grid-column: 1 / -1; padding: 28px 0; text-align: center; color: var(--text-muted); font-size: 12px; }
   .mini-btn.danger, .mini-btn.danger:hover, .mini-btn.danger:focus {
     border-color: var(--danger);
     outline: none;
@@ -1118,11 +1320,13 @@
   }
   .modal-mask.show { display: flex; }
   .modal {
-    background: #fff; border-radius: 10px; box-shadow: 0 12px 40px rgba(0,0,0,.18);
+    background: var(--panel-bg); color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 10px; box-shadow: 0 12px 40px rgba(0,0,0,.18);
     width: 380px; max-width: 92vw; max-height: 80vh; display: flex; flex-direction: column;
     overflow: hidden;
   }
-  .modal-head { padding: 14px 18px; border-bottom: 1px solid #eef0f4; display: flex; justify-content: space-between; align-items: center; }
+  .modal-head { padding: 14px 18px; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; }
   .modal-title { font-size: 15px; font-weight: 600; color: var(--text-strong); }
   .modal-close { border: none; background: transparent; padding: 4px 8px; cursor: pointer;
     color: var(--text-muted); font-size: 18px; line-height: 1; border-radius: 4px;
@@ -1132,27 +1336,27 @@
   .reorder-item {
     display: flex; align-items: center; gap: 10px; padding: 8px 10px;
     border: 1px solid var(--border-light); border-radius: 7px; margin-bottom: 6px;
-    background: #fafbfc;
+    background: var(--panel-bg-alt);
   }
   .reorder-item:last-child { margin-bottom: 0; }
-  .reorder-item.dragging { opacity: .5; background: var(--accent-bg); border-color: #b3d7ff; }
-  .reorder-item.pinned { border-color: #ffd98a; background: #fffbea; }
-  .reorder-section-head { padding: 6px 4px 4px; font-size: 12px; font-weight: 600; color: #8a9099; letter-spacing: .3px; }
-  .reorder-section-sep { height: 1px; background: #eef0f4; margin: 10px 4px; }
-  .reorder-grip { color: #b7bcc6; font-size: 18px; user-select: none; line-height: 1; cursor: grab; }
+  .reorder-item.dragging { opacity: .5; background: var(--accent-bg); border-color: var(--accent); }
+  .reorder-item.pinned { border-color: var(--pin-border); background: var(--pin-bg); }
+  .reorder-section-head { padding: 6px 4px 4px; font-size: 12px; font-weight: 600; color: var(--text-muted); letter-spacing: .3px; }
+  .reorder-section-sep { height: 1px; background: var(--border-light); margin: 10px 4px; }
+  .reorder-grip { color: var(--text-muted); opacity: .65; font-size: 18px; user-select: none; line-height: 1; cursor: grab; }
   .reorder-label { flex: 1; font-size: 13.5px; color: var(--text-strong); font-weight: 500; }
   .reorder-btns { display: flex; gap: 4px; }
   .reorder-btns button {
     padding: 3px 6px; min-height: 26px; min-width: 26px;
     font-size: 0; border-radius: 5px;
-    border: 1px solid var(--border); background: #fff; color: var(--text-sub); cursor: pointer;
+    border: 1px solid var(--border); background: var(--panel-bg); color: var(--text-sub); cursor: pointer;
     display: inline-flex; align-items: center; justify-content: center;
   }
   .reorder-btns button svg { width: 14px; height: 14px; }
   .reorder-btns button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
   .reorder-btns button:disabled { opacity: .35; cursor: not-allowed; }
   .modal-foot {
-    padding: 12px 18px; border-top: 1px solid #eef0f4;
+    padding: 12px 18px; border-top: 1px solid var(--border-light);
     display: flex; gap: 8px; justify-content: space-between;
   }
   .modal-foot button { padding: 7px 16px; font-size: 13px; min-height: 34px; }
@@ -1165,8 +1369,6 @@
     color: var(--text); word-break: break-word;
   }
 </style>
-  <!-- 网页版：外链小篆字体，不内嵌 -->
-  <link rel="stylesheet" href="font-family/chongxi/result.css">
 </head>
 <body>
 
@@ -1182,12 +1384,14 @@
   <canvas id="canvas"></canvas>
   <canvas id="drawCanvas"></canvas>
   <div id="drawBorderOverlay"></div>
+  <canvas id="drawAdjustOverlay" aria-hidden="true"></canvas>
+  <div id="eraserCursor" aria-hidden="true"></div>
 </div>
 
 <div class="control-panel">
   <!-- 顶部标题横条 -->
   <div class="panel-header">
-    <h1><img class="brand-logo" alt="" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzAuOCIgZmlsbD0iI2ZmZiIvPjxnIGZpbGw9IiNmZmYiPjxjaXJjbGUgY3g9IjMyIiBjeT0iMTEuNSIgcj0iMTAuMjUiLz48Y2lyY2xlIGN4PSIxMS41IiBjeT0iMzIiIHI9IjEwLjI1Ii8+PGNpcmNsZSBjeD0iNTIuNSIgY3k9IjMyIiByPSIxMC4yNSIvPjxjaXJjbGUgY3g9IjMyIiBjeT0iNTIuNSIgcj0iMTAuMjUiLz48Y2lyY2xlIGN4PSIzMiIgY3k9IjMyIiByPSIxMC4yNSIvPjwvZz48ZyBmaWxsPSIjMTExIj48Y2lyY2xlIGN4PSIzMiIgY3k9IjExLjUiIHI9IjQuNzUiLz48Y2lyY2xlIGN4PSIxMS41IiBjeT0iMzIiIHI9IjEwLjI1Ii8+PGNpcmNsZSBjeD0iNTIuNSIgY3k9IjMyIiByPSI2Ljc1Ii8+PGNpcmNsZSBjeD0iMzIiIGN5PSI1Mi41IiByPSIxMC4yNSIvPjwvZz48ZyBmaWxsPSIjZmZmIj48Y2lyY2xlIGN4PSIxMS41IiBjeT0iMzIiIHI9IjYuNSIvPjxjaXJjbGUgY3g9IjUyLjUiIGN5PSIzMiIgcj0iMi45NSIvPjxjaXJjbGUgY3g9IjMyIiBjeT0iNTIuNSIgcj0iNC42Ii8+PC9nPjxjaXJjbGUgY3g9IjExLjUiIGN5PSIzMiIgcj0iMy4xIiBmaWxsPSIjMTExIi8+PHBhdGggZD0iTTMyIDIxLjc1YTUuMTI1IDUuMTI1IDAgMCAxIDAgMTAuMjVhNS4xMjUgNS4xMjUgMCAwIDAgMCAxMC4yNWExMC4yNSAxMC4yNSAwIDAgMCAwLTIwLjV6IiBmaWxsPSIjMTExIi8+PGcgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMTExIiBzdHJva2Utd2lkdGg9IjAuMSI+PGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzAuOCIvPjxjaXJjbGUgY3g9IjMyIiBjeT0iMTEuNSIgcj0iMTAuMjUiLz48Y2lyY2xlIGN4PSIxMS41IiBjeT0iMzIiIHI9IjEwLjI1Ii8+PGNpcmNsZSBjeD0iNTIuNSIgY3k9IjMyIiByPSIxMC4yNSIvPjxjaXJjbGUgY3g9IjMyIiBjeT0iNTIuNSIgcj0iMTAuMjUiLz48Y2lyY2xlIGN4PSIzMiIgY3k9IjMyIiByPSIxMC4yNSIvPjwvZz48L3N2Zz4K"><span id="appTitle">眼师五行八识图演示工具v1.13</span></h1>
+    <h1><img class="brand-logo" alt="" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzAuOCIgZmlsbD0iI2ZmZiIvPjxnIGZpbGw9IiNmZmYiPjxjaXJjbGUgY3g9IjMyIiBjeT0iMTEuNSIgcj0iMTAuMjUiLz48Y2lyY2xlIGN4PSIxMS41IiBjeT0iMzIiIHI9IjEwLjI1Ii8+PGNpcmNsZSBjeD0iNTIuNSIgY3k9IjMyIiByPSIxMC4yNSIvPjxjaXJjbGUgY3g9IjMyIiBjeT0iNTIuNSIgcj0iMTAuMjUiLz48Y2lyY2xlIGN4PSIzMiIgY3k9IjMyIiByPSIxMC4yNSIvPjwvZz48ZyBmaWxsPSIjMTExIj48Y2lyY2xlIGN4PSIzMiIgY3k9IjExLjUiIHI9IjQuNzUiLz48Y2lyY2xlIGN4PSIxMS41IiBjeT0iMzIiIHI9IjEwLjI1Ii8+PGNpcmNsZSBjeD0iNTIuNSIgY3k9IjMyIiByPSI2Ljc1Ii8+PGNpcmNsZSBjeD0iMzIiIGN5PSI1Mi41IiByPSIxMC4yNSIvPjwvZz48ZyBmaWxsPSIjZmZmIj48Y2lyY2xlIGN4PSIxMS41IiBjeT0iMzIiIHI9IjYuNSIvPjxjaXJjbGUgY3g9IjUyLjUiIGN5PSIzMiIgcj0iMi45NSIvPjxjaXJjbGUgY3g9IjMyIiBjeT0iNTIuNSIgcj0iNC42Ii8+PC9nPjxjaXJjbGUgY3g9IjExLjUiIGN5PSIzMiIgcj0iMy4xIiBmaWxsPSIjMTExIi8+PHBhdGggZD0iTTMyIDIxLjc1YTUuMTI1IDUuMTI1IDAgMCAxIDAgMTAuMjVhNS4xMjUgNS4xMjUgMCAwIDAgMCAxMC4yNWExMC4yNSAxMC4yNSAwIDAgMCAwLTIwLjV6IiBmaWxsPSIjMTExIi8+PGcgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMTExIiBzdHJva2Utd2lkdGg9IjAuMSI+PGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzAuOCIvPjxjaXJjbGUgY3g9IjMyIiBjeT0iMTEuNSIgcj0iMTAuMjUiLz48Y2lyY2xlIGN4PSIxMS41IiBjeT0iMzIiIHI9IjEwLjI1Ii8+PGNpcmNsZSBjeD0iNTIuNSIgY3k9IjMyIiByPSIxMC4yNSIvPjxjaXJjbGUgY3g9IjMyIiBjeT0iNTIuNSIgcj0iMTAuMjUiLz48Y2lyY2xlIGN4PSIzMiIgY3k9IjMyIiByPSIxMC4yNSIvPjwvZz48L3N2Zz4K"><span id="appTitle">眼师五行八识图演示工具v1.15</span></h1>
     <button class="zen-toggle" id="zenToggle" title="禅定模式" aria-label="禅定模式">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <circle cx="12" cy="5.2" r="2.2"/>
@@ -1688,7 +1892,6 @@
               <option value="song">宋体</option>
               <option value="kai">楷体</option>
               <option value="fangsong">仿宋</option>
-              <option value="zt">小篆</option>
             </select>
             <select id="tianTextWeight" class="weight-select" aria-label="粗细">
               <option value="300">细</option>
@@ -2402,55 +2605,28 @@
           <label class="switch"><input type="checkbox" id="drawShow"><span class="slider"></span></label>
         </span>
       </h3>
-      <div class="element-row">
-        <div class="element-card">
-          <div class="header"><span>画板</span></div>
-          <div class="row-item">
-            <label>类型</label>
-            <select id="drawType" class="order-select">
-              <option value="free">自由</option>
-              <option value="line">直线</option>
-              <option value="rect">正方形</option>
-              <option value="circle">圆形</option>
-              <option value="triangle">三角形</option>
-            </select>
-            <button type="button" class="step-btn reset" data-reset-type="drawType" title="重置" aria-label="重置"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></button>
-          </div>
-          <div class="row-item">
-            <label>颜色</label>
-            <select id="drawColor" class="order-select">
-              <option value="#000000" selected class="opt-c-black">黑</option>
-              <option value="#ffffff" class="opt-c-white">白</option>
-              <option value="#e53935" class="opt-c-red">红</option>
-              <option value="#fb8c00" class="opt-c-orange">橙</option>
-              <option value="#fdd835" class="opt-c-yellow">黄</option>
-              <option value="#43a047" class="opt-c-green">绿</option>
-              <option value="#00acc1" class="opt-c-cyan">青</option>
-              <option value="#1e88e5" class="opt-c-blue">蓝</option>
-              <option value="#8e24aa" class="opt-c-purple">紫</option>
-              <option value="custom">自定义…</option>
-            </select>
-            <input type="color" id="drawColorCustom" class="color-input-sm hidden" value="#000000" title="自定义颜色">
-            <button type="button" class="step-btn reset" data-reset-color="drawColor" title="重置" aria-label="重置"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></button>
-          </div>
-          <div class="row-item">
-            <label>粗细</label>
-            <span class="val" id="drawSizeVal">3</span>
-            <input type="range" id="drawSize" min="1" max="30" step="1" value="3">
-            <button type="button" class="step-btn" data-target="drawSize" data-dir="-1" aria-label="减少"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
-            <button type="button" class="step-btn" data-target="drawSize" data-dir="1" aria-label="增加"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><line x1="12" y1="5" x2="12" y2="19"/></svg></button>
-            <button type="button" class="step-btn reset" data-target="drawSize" title="重置" aria-label="重置"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></button>
-          </div>
-          <div class="row-item">
-            <label>边框</label>
-            <label class="switch"><input type="checkbox" id="drawBorder"><span class="slider"></span></label>
-            <label class="label-gap6">橡皮</label>
-            <label class="switch"><input type="checkbox" id="drawEraser"><span class="slider"></span></label>
-            <button type="button" class="mini-btn push-right" id="drawUndo">撤销</button>
-            <button type="button" class="mini-btn danger" id="drawClear">清除画板</button>
-          </div>
+      <div class="element-card element-card-standalone">
+        <div class="header"><span>通用</span></div>
+        <div class="row-item">
+          <label>当前</label>
+          <select id="drawActiveLayer" class="order-select"></select>
+          <button type="button" class="step-btn" id="drawLayerPrev" title="上一层" aria-label="上一层"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 15 12 9 18 15"/></svg></button>
+          <button type="button" class="step-btn" id="drawLayerNext" title="下一层" aria-label="下一层"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
+        </div>
+        <div class="row-item">
+          <label>边框</label>
+          <label class="switch"><input type="checkbox" id="drawBorder"><span class="slider"></span></label>
+          <label class="label-gap6">橡皮</label>
+          <label class="switch"><input type="checkbox" id="drawEraser"><span class="slider"></span></label>
+        </div>
+        <div class="row-item layer-actions">
+          <button type="button" class="mini-btn" id="drawTplBtn">图层模板</button>
+          <button type="button" class="mini-btn" id="drawMergeAll">合并图层</button>
+          <button type="button" class="mini-btn danger" id="drawClear">清除画板</button>
+          <button type="button" class="mini-btn danger" id="drawClearLayer" title="清除当前图层笔迹">清除图层</button>
         </div>
       </div>
+      <div class="element-row" id="drawLayerCards"></div>
     </div>
 
   </div>
@@ -2538,7 +2714,6 @@
           <option value="song">宋体</option>
           <option value="kai">楷体</option>
           <option value="fangsong">仿宋</option>
-          <option value="zt">小篆</option>
         </select>
         <select id="kwWeight" class="weight-select" aria-label="粗细">
           <option value="300">细</option>
@@ -2559,13 +2734,15 @@
       <div class="row-item">
         <label>最大数量</label>
         <input type="number" id="kwMax" min="1" max="400" step="1" value="100">
-        <label class="label-inline">选取模式</label>
-        <select id="kwPick" class="kw-unit">
+      </div>
+      <div class="row-item">
+        <label>选取模式</label>
+        <select id="kwPick">
           <option value="random" selected>随机</option>
           <option value="sequence">顺序</option>
         </select>
       </div>
-      <div class="row-item">
+      <div class="row-item" id="kwGradRow">
         <label>生灭渐变</label>
         <label class="switch">
           <input type="checkbox" id="kwLifeGrad" checked>
@@ -2719,6 +2896,12 @@
   </div>
 </div>
 
+<!-- 画板模板生成浮层 -->
+<div class="draw-tpl-pop" id="drawTplPop" hidden>
+  <div class="draw-tpl-cats" id="drawTplCats"></div>
+  <div class="draw-tpl-list" id="drawTplList"></div>
+</div>
+
 <!-- 导入数据提示浮层 -->
 <div class="modal-mask" id="dataMask">
   <div class="modal modal-sm" role="dialog" aria-modal="true">
@@ -2738,9 +2921,35 @@
   </div>
 </div>
 
+<!-- 存为模板浮层：选择分类并命名 -->
+<div class="modal-mask" id="tplSaveMask">
+  <div class="modal modal-sm" role="dialog" aria-modal="true">
+    <div class="modal-head">
+      <span class="modal-title">存为模板</span>
+      <button type="button" class="modal-close" id="tplSaveClose" aria-label="关闭">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="tpl-save-row">
+        <label for="tplSaveCat">分类</label>
+        <select id="tplSaveCat"></select>
+      </div>
+      <div class="tpl-save-row">
+        <label for="tplSaveName">名称</label>
+        <input type="text" id="tplSaveName" maxlength="20" placeholder="模板名称">
+      </div>
+    </div>
+    <div class="modal-foot modal-foot-end">
+      <div class="modal-actions">
+        <button type="button" id="tplSaveCancel">取消</button>
+        <button type="button" class="primary" id="tplSaveOk">保存</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 // ==================== 版本号（标题、导出数据等统一引用） ====================
-const APP_VERSION = 'v1.13';
+const APP_VERSION = 'v1.15';
 const APP_NAME = '眼师五行八识图演示工具';
 document.title = APP_NAME + APP_VERSION;
 const appTitleEl = document.getElementById('appTitle');
@@ -3037,7 +3246,7 @@ function reorderUnpin(key) {
 // 模态框内 tab-btn 样式（简单 inline 不够，给个 CSS 类）
 const modalStyle = document.createElement('style');
 modalStyle.textContent = `
-  .tab-btn { padding: 5px 12px; min-height: 28px; font-size: 13px; border: 1px solid var(--border); background: #fff; color: var(--text-sub); border-radius: 5px; cursor: pointer; }
+  .tab-btn { padding: 5px 12px; min-height: 28px; font-size: 13px; border: 1px solid var(--border); background: var(--panel-bg); color: var(--text-sub); border-radius: 5px; cursor: pointer; }
   .tab-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 `;
 document.head.appendChild(modalStyle);
@@ -3051,7 +3260,11 @@ const state = {
   globalDashed: false,
   globalBorder: true,
 
-  draw: { show: false, type: 'free', color: '#000000', size: 3, eraser: false, border: false },
+  draw: {
+    show: false, eraser: false, border: false,
+    activeId: 1, nextId: 2,
+    layers: [{ id: 1, name: '图层01', type: 'free', color: '#000000', custom: '#000000', size: 3, opacity: 100, visible: true, shapes: [] }],
+  },
 
   taiji: { angle: 0, speed: 0, show: false, enable: false, showEyes: false, showBorder: true, dashed: false, flip: false, trans: 0 },
   top:    { phase: 0, angle: 0, speed: 0, evolveRate: 0, show: false, enable: false, border: true, dashed: false, innerDashed: false, trans: 0 },
@@ -3138,10 +3351,19 @@ if (window.ResizeObserver) {
 // ==================== 自由画板 ====================
 const drawCanvas = document.getElementById('drawCanvas');
 const drawCtx = drawCanvas.getContext('2d');
+// 调整最后一笔：选中某图层后，仅该层最后一个笔触可拖拽/旋转/缩放
+let adjustLayerId = null;
+let adjustDrag = null;
+// 调整范围：last=仅最后一笔，layer=整个图层内容
+let adjustScope = 'last';
 
 // 让 drawCanvas 与主 canvas 有完全相同的 CSS 位置、物理尺寸和坐标变换
 // ============ 自由画板 ============
-let drawShapes = [];
+// 当前绘制图层（落笔与撤销作用于该层）
+function activeDrawLayer() {
+  const d = state.draw;
+  return d.layers.find(l => l.id === d.activeId) || d.layers[0];
+}
 
 function setupDrawCanvas() {
   // 1. CSS 位置和尺寸：精确对齐 canvas（补偿 canvas-wrap 的 padding）
@@ -3163,6 +3385,12 @@ function setupDrawCanvas() {
   borderOverlay.style.top = drawCanvas.style.top;
   borderOverlay.style.width = drawCanvas.style.width;
   borderOverlay.style.height = drawCanvas.style.height;
+  // 同步调整辅助层位置尺寸
+  const adjustOverlay = document.getElementById('drawAdjustOverlay');
+  adjustOverlay.style.left = drawCanvas.style.left;
+  adjustOverlay.style.top = drawCanvas.style.top;
+  adjustOverlay.style.width = drawCanvas.style.width;
+  adjustOverlay.style.height = drawCanvas.style.height;
 
   // 2. 物理像素和 setTransform：与 canvas 完全相同
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -3171,8 +3399,9 @@ function setupDrawCanvas() {
   drawCanvas.height = physical;
   const scale = physical / (DESIGN + CANVAS_MARGIN * 2);
   drawCtx.setTransform(scale, 0, 0, scale, scale * CANVAS_MARGIN, scale * CANVAS_MARGIN);
-  if (drawShapes.length > 0) renderAllShapes(); // resize 后重绘历史
+  if (state.draw.layers.some(l => l.shapes.length > 0)) renderAllShapes(); // resize 后重绘历史
   drawDrawBorder(); // 同步边框覆盖层可见性
+  renderAdjustOverlay(); // 同步调整辅助框
 }
 setupDrawCanvas();
 window.addEventListener('resize', setupDrawCanvas);
@@ -3201,16 +3430,32 @@ let currentStroke = null;
 function drawOneShape(s) {
   if (s.type === 'erase') {
     drawCtx.globalCompositeOperation = 'destination-out';
+    drawCtx.globalAlpha = 1;
     drawCtx.strokeStyle = 'rgba(0,0,0,1)';
     drawCtx.fillStyle = 'rgba(0,0,0,1)';
     drawCtx.lineWidth = s.size;
   } else {
     drawCtx.globalCompositeOperation = 'source-over';
+    // 单笔透明度：写入笔迹时的透明度，旧笔迹无该字段时按不透明绘制
+    drawCtx.globalAlpha = typeof s.opacity === 'number' ? s.opacity : 1;
     drawCtx.strokeStyle = s.color;
     drawCtx.fillStyle = s.color;
     drawCtx.lineWidth = s.size;
   }
   drawCtx.lineCap = 'round'; drawCtx.lineJoin = 'round';
+  // 旋转：绕笔迹包围盒中心旋转后绘制（矩形/圆形等按原类型绘制，不改变几何）
+  const rot = typeof s.rot === 'number' ? s.rot : 0;
+  let rotPivot = null;
+  if (rot) {
+    const b = shapeBounds(s);
+    if (b) {
+      rotPivot = { x: (b.minX + b.maxX) / 2, y: (b.minY + b.maxY) / 2 };
+      drawCtx.save();
+      drawCtx.translate(rotPivot.x, rotPivot.y);
+      drawCtx.rotate(rot);
+      drawCtx.translate(-rotPivot.x, -rotPivot.y);
+    }
+  }
   drawCtx.beginPath();
   if (s.type === 'free' || s.type === 'erase') {
     const pts = s.points;
@@ -3242,6 +3487,8 @@ function drawOneShape(s) {
       drawCtx.stroke();
     }
   }
+  if (rotPivot) drawCtx.restore();
+  drawCtx.globalAlpha = 1;
 }
 
 function renderAllShapes() {
@@ -3250,19 +3497,26 @@ function renderAllShapes() {
   drawCtx.setTransform(1,0,0,1,0,0);
   drawCtx.clearRect(0, 0, physical, physical);
   drawCtx.setTransform(scale, 0, 0, scale, scale * CANVAS_MARGIN, scale * CANVAS_MARGIN);
-  for (const s of drawShapes) drawOneShape(s);
+  for (const l of state.draw.layers) { if (l.visible === false) continue; for (const s of l.shapes) drawOneShape(s); }
+  syncLayerSaveButtons();
+  renderAdjustOverlay();
 }
 
 function drawStart(e) {
   if (!state.draw.show) return;
+  // 调整模式下不落笔
+  if (adjustLayerId) return;
+  // 当前图层已关闭显示时不允许落笔
+  if (activeDrawLayer().visible === false) return;
   drawing = true;
   const p = drawPos(e);
+  const layer = activeDrawLayer();
   drawStartX = p.x; drawStartY = p.y;
   drawLastX = p.x; drawLastY = p.y;
   if (state.draw.eraser) {
-    currentStroke = { type: 'erase', points: [{x:p.x,y:p.y}], size: state.draw.size * 3 };
-  } else if (state.draw.type === 'free') {
-    currentStroke = { type: 'free', points: [{x:p.x,y:p.y}], color: state.draw.color, size: state.draw.size };
+    currentStroke = { type: 'erase', points: [{x:p.x,y:p.y}], size: layer.size * 3 };
+  } else if (layer.type === 'free') {
+    currentStroke = { type: 'free', points: [{x:p.x,y:p.y}], color: layer.color, size: layer.size, opacity: layer.opacity / 100 };
   } else {
     currentStroke = null; // line/rect/circle/triangle 走预览
   }
@@ -3272,14 +3526,17 @@ function drawStart(e) {
 function drawMove(e) {
   if (!drawing || !state.draw.show) return;
   const p = drawPos(e);
+  const layer = activeDrawLayer();
   if (state.draw.eraser || currentStroke) {
     // 橡皮擦 / 自由线：追加点 + 画最后一段
     currentStroke.points.push({ x: p.x, y: p.y });
+    // 半透明笔迹必须整条重绘，否则每追加一段都会在已有笔迹上重复叠加透明度
+    if (currentStroke.opacity !== undefined && currentStroke.opacity < 1) renderAllShapes();
     drawOneShape(currentStroke);
   } else {
     // 形状：清除→重绘历史→画预览（保证只有一个）
     renderAllShapes();
-    drawOneShape({ type: state.draw.type, x1: drawStartX, y1: drawStartY, x2: p.x, y2: p.y, color: state.draw.color, size: state.draw.size });
+    drawOneShape({ type: layer.type, x1: drawStartX, y1: drawStartY, x2: p.x, y2: p.y, color: layer.color, size: layer.size, opacity: layer.opacity / 100 });
   }
   drawLastX = p.x; drawLastY = p.y;
   e.preventDefault();
@@ -3288,14 +3545,16 @@ function drawMove(e) {
 function drawEnd(e) {
   if (!drawing) return;
   drawing = false;
+  const layer = activeDrawLayer();
   if (currentStroke && currentStroke.points.length >= 2) {
-    drawShapes.push(currentStroke);
-  } else if (!state.draw.eraser && state.draw.type !== 'free') {
+    layer.shapes.push(currentStroke);
+  } else if (!state.draw.eraser && layer.type !== 'free') {
     const p = { x: drawLastX, y: drawLastY };
-    drawShapes.push({ type: state.draw.type, x1: drawStartX, y1: drawStartY, x2: p.x, y2: p.y, color: state.draw.color, size: state.draw.size });
+    layer.shapes.push({ type: layer.type, x1: drawStartX, y1: drawStartY, x2: p.x, y2: p.y, color: layer.color, size: layer.size, opacity: layer.opacity / 100 });
     renderAllShapes();
   }
   currentStroke = null;
+  syncLayerSaveButtons();
   saveConfig();
 }
 
@@ -3306,19 +3565,98 @@ drawCanvas.addEventListener('touchstart', drawStart, { passive: false });
 window.addEventListener('touchmove', drawMove, { passive: false });
 window.addEventListener('touchend', drawEnd);
 
+// 调整最后一笔：画布上拦截指针，执行拖拽/旋转/缩放
+drawCanvas.addEventListener('mousedown', e => {
+  if (!adjustLayerId) return;
+  e.preventDefault();
+  adjustPointerDown(e);
+});
+window.addEventListener('mousemove', e => {
+  if (!adjustDrag) return;
+  e.preventDefault();
+  adjustPointerMove(e);
+});
+window.addEventListener('mouseup', () => { if (adjustDrag) adjustPointerUp(); });
+drawCanvas.addEventListener('touchstart', e => {
+  if (!adjustLayerId || !e.touches[0]) return;
+  e.preventDefault();
+  adjustPointerDown(e.touches[0]);
+}, { passive: false });
+window.addEventListener('touchmove', e => {
+  if (!adjustDrag || !e.touches[0]) return;
+  e.preventDefault();
+  adjustPointerMove(e.touches[0]);
+}, { passive: false });
+window.addEventListener('touchend', () => { if (adjustDrag) adjustPointerUp(); });
+
+// ============ 橡皮圆形光标 ============
+// 直径与橡皮实际笔迹一致：图层粗细 × 3（设计单位）换算为 CSS 像素
+const eraserCursor = document.getElementById('eraserCursor');
+let eraserCursorPos = null;
+
+function eraserCursorDiameter() {
+  const fullSize = DESIGN + CANVAS_MARGIN * 2;
+  const cssWidth = drawCanvas.getBoundingClientRect().width;
+  return cssWidth / fullSize * activeDrawLayer().size * 3;
+}
+function placeEraserCursor(e) {
+  eraserCursorPos = { x: e.clientX, y: e.clientY };
+  const d = eraserCursorDiameter();
+  eraserCursor.style.width = d + 'px';
+  eraserCursor.style.height = d + 'px';
+  eraserCursor.style.left = e.clientX + 'px';
+  eraserCursor.style.top = e.clientY + 'px';
+}
+function canDrawOnActiveLayer() {
+  const l = activeDrawLayer();
+  return !!(state.draw.show && l && l.visible !== false);
+}
+function updateEraserCursorState() {
+  const active = canDrawOnActiveLayer() && state.draw.eraser;
+  document.body.classList.toggle('eraser-active', active);
+  if (!active) eraserCursor.classList.remove('visible');
+}
+// 当前图层不可绘制时，画笔光标回落为普通指针
+function updateDrawCursorState() {
+  const usable = canDrawOnActiveLayer();
+  document.body.classList.toggle('draw-no-layer', !usable);
+  document.body.classList.toggle('adjust-on', !!adjustLayerId);
+  updateEraserCursorState();
+  if (!usable || adjustLayerId) eraserCursor.classList.remove('visible');
+}
+// 粗细变化 / 尺寸变化时同步光标直径
+function refreshEraserCursor() {
+  updateEraserCursorState();
+  if (eraserCursor.classList.contains('visible') && eraserCursorPos) placeEraserCursor(eraserCursorPos);
+}
+drawCanvas.addEventListener('mouseenter', e => {
+  if (adjustLayerId || !canDrawOnActiveLayer() || !state.draw.eraser) return;
+  placeEraserCursor(e);
+  eraserCursor.classList.add('visible');
+});
+drawCanvas.addEventListener('mousemove', e => {
+  if (adjustLayerId || !canDrawOnActiveLayer() || !state.draw.eraser) return;
+  placeEraserCursor(e);
+  eraserCursor.classList.add('visible');
+});
+drawCanvas.addEventListener('mouseleave', () => eraserCursor.classList.remove('visible'));
+window.addEventListener('blur', () => eraserCursor.classList.remove('visible'));
+
 function clearDraw() {
-  drawShapes = [];
+  for (const l of state.draw.layers) l.shapes = [];
   renderAllShapes();
   saveConfig();
 }
-function undoDraw() {
-  if (drawShapes.length === 0) return;
-  drawShapes.pop();
+function undoDraw(layerId) {
+  const layer = state.draw.layers.find(l => l.id === layerId) || activeDrawLayer();
+  if (layer.shapes.length === 0) return;
+  layer.shapes.pop();
   renderAllShapes();
   saveConfig();
 }
 function updateDrawActive() {
   document.body.classList.toggle('draw-active', state.draw.show);
+  updateDrawCursorState();
 }
 // 把画板层合成到主 canvas
 function drawDrawOverlay() {
@@ -3333,7 +3671,7 @@ function drawDrawOverlay() {
 function drawDrawBorder() {
   const overlay = document.getElementById('drawBorderOverlay');
   if (!overlay) return;
-  overlay.classList.toggle('visible', !!state.draw.border);
+  overlay.classList.toggle('visible', !!(state.draw.border && state.draw.show));
 }
 
 // 中心点固定在设计坐标系 (DESIGN/2, DESIGN/2)
@@ -5013,9 +5351,13 @@ importDataFile.addEventListener('change', ev => {
 
 document.getElementById('btnReset').addEventListener('click', () => {
   state.globalShow = false; state.globalAngle = 0; state.globalSpeed = 0; state.globalEnable = false; state.globalDashed = false; state.globalBorder = true;
-  state.draw = { show: false, type: 'free', color: '#000000', size: 3, eraser: false, border: false };
-  clearDraw();
+  state.draw = {
+    show: false, eraser: false, border: false,
+    activeId: 1, nextId: 2,
+    layers: [{ id: 1, name: '图层01', type: 'free', color: '#000000', custom: '#000000', size: 3, opacity: 100, visible: true, shapes: [] }],
+  };
   updateDrawActive();
+  updateEraserCursorState();
   state.taiji = { angle: 0, speed: 0, show: false, enable: false, showEyes: false, showBorder: true, dashed: false, trans: 0 };
   state.top =    { phase: 0, angle: 0, speed: 0, evolveRate: 0, show: false, enable: false, border: true, dashed: false, innerDashed: false, trans: 0 };
   state.bottom = { phase: 0, angle: 0, speed: 0, evolveRate: 0, show: false, enable: false, border: true, dashed: false, innerDashed: false, trans: 0 };
@@ -5065,16 +5407,14 @@ document.getElementById('btnReset').addEventListener('click', () => {
   document.getElementById('globalBorder').checked = true;
 
   document.getElementById('drawShow').checked = false;
-  document.getElementById('drawType').value = 'free';
-  document.getElementById('drawColor').value = '#000000';
-  syncDrawColor();
-  document.getElementById('drawSize').value = 3;
-  document.getElementById('drawSizeVal').textContent = '3';
+  // 图层恢复为单个默认图层
+  state.draw.layers = [{ id: 1, name: '图层01', type: 'free', color: '#000000', custom: '#000000', size: 3, opacity: 100, visible: true, shapes: [] }];
+  state.draw.activeId = 1;
+  state.draw.nextId = 2;
+  renderDrawLayers();
   document.getElementById('drawEraser').checked = false;
   document.getElementById('drawBorder').checked = false;
   drawDrawBorder(); // 同步边框覆盖层隐藏
-  document.getElementById('drawType').disabled = false;
-  document.getElementById('drawColor').disabled = false;
 
   document.getElementById('taijiShow').checked = false;
   document.getElementById('taijiEnable').checked = false;
@@ -5306,52 +5646,1269 @@ document.getElementById('globalSpeed').addEventListener('input', e => {
 document.getElementById('globalDashed').addEventListener('change', e => state.globalDashed = e.target.checked);
 document.getElementById('globalBorder').addEventListener('change', e => state.globalBorder = e.target.checked);
 
-// 画板（独立分组）
-const drawColorSel = document.getElementById('drawColor');
+// 画板（独立分组）：通用 + 多图层
+const DRAW_PRESET_COLORS = ['#000000', '#ffffff', '#e53935', '#fb8c00', '#fdd835', '#43a047', '#00acc1', '#1e88e5', '#8e24aa'];
+const DRAW_COLOR_NAMES = { '#000000': '黑', '#ffffff': '白', '#e53935': '红', '#fb8c00': '橙', '#fdd835': '黄', '#43a047': '绿', '#00acc1': '青', '#1e88e5': '蓝', '#8e24aa': '紫' };
+const drawLayerBox = document.getElementById('drawLayerCards');
 
-// select 跟随选中项字体颜色
-function syncDrawColor() {
-  const customInput = document.getElementById('drawColorCustom');
-  const v = drawColorSel.value;
-  if (v === 'custom') {
-    customInput.classList.remove('hidden');
-    const c = customInput.value;
-    state.draw.color = c;
-    drawColorSel.style.color = c;
-  } else {
-    customInput.classList.add('hidden');
-    state.draw.color = v;
-    drawColorSel.style.color = (v === '#ffffff') ? '#999999' : v;
-  }
+function escapeDrawName(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
 }
 
-drawColorSel.addEventListener('change', syncDrawColor);
-document.getElementById('drawColorCustom').addEventListener('input', syncDrawColor);
-syncDrawColor();
+function drawLayerCardHTML(l) {
+  const isActive = l.id === state.draw.activeId;
+  const isCustom = DRAW_PRESET_COLORS.indexOf(l.color) < 0;
+  const colorOpts = DRAW_PRESET_COLORS.map(c =>
+    `<option value="${c}"${c === l.color ? ' selected' : ''}>${DRAW_COLOR_NAMES[c]}</option>`).join('')
+    + `<option value="custom"${isCustom ? ' selected' : ''}>自定义…</option>`;
+  const typeOpts = [['free', '自由'], ['line', '直线'], ['rect', '正方形'], ['circle', '圆形'], ['triangle', '三角形']]
+    .map(([v, n]) => `<option value="${v}"${v === l.type ? ' selected' : ''}>${n}</option>`).join('');
+  const resetSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>';
+  const layerIdx = state.draw.layers.indexOf(l);
+  const upDisabled = layerIdx <= 0;
+  const downDisabled = layerIdx < 0 || layerIdx >= state.draw.layers.length - 1;
+  const lastShape = l.shapes[l.shapes.length - 1];
+  const canAdjust = !!lastShape && lastShape.type !== 'erase';
+  const canAdjustLayer = l.shapes.some(s => s.type !== 'erase');
+  return `
+        <div class="element-card layer-card${isActive ? ' active' : ''}" data-layer="${l.id}">
+          <div class="header">
+            <span class="layer-title"><svg class="drag-grip" viewBox="0 0 12 16" fill="currentColor" aria-hidden="true"><circle cx="3" cy="3" r="1.4"/><circle cx="9" cy="3" r="1.4"/><circle cx="3" cy="8" r="1.4"/><circle cx="9" cy="8" r="1.4"/><circle cx="3" cy="13" r="1.4"/><circle cx="9" cy="13" r="1.4"/></svg>图层</span>
+            <div class="header-right">
+              <span class="header-label">显示</span>
+              <label class="switch"><input type="checkbox" data-visible="${l.id}"${l.visible ? ' checked' : ''}><span class="slider"></span></label>
+            </div>
+          </div>
+          <div class="row-item">
+            <label>名称</label>
+            <input type="text" class="layer-name-input" data-name="${l.id}" maxlength="20" value="${escapeDrawName(l.name)}" placeholder="请输入名称">
+            <button type="button" class="step-btn" data-add="${l.id}" title="新建图层" aria-label="新建图层"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><line x1="12" y1="5" x2="12" y2="19"/></svg></button>
+          </div>
+          <div class="row-item">
+            <label>类型</label>
+            <select class="order-select" data-type="${l.id}">${typeOpts}</select>
+            <button type="button" class="step-btn reset" data-reset-type="${l.id}" title="重置" aria-label="重置">${resetSvg}</button>
+          </div>
+          <div class="row-item">
+            <label>颜色</label>
+            <select class="order-select" data-color="${l.id}" style="color:${l.color === '#ffffff' ? '#999999' : l.color}">${colorOpts}</select>
+            <input type="color" class="color-input-sm${isCustom ? '' : ' hidden'}" data-picker="${l.id}" value="${isCustom ? l.color : '#000000'}" title="自定义颜色">
+            <button type="button" class="step-btn reset" data-reset-color="${l.id}" title="重置" aria-label="重置">${resetSvg}</button>
+          </div>
+          <div class="row-item">
+            <label>粗细</label>
+            <span class="val" data-sizeval="${l.id}">${l.size}</span>
+            <input type="range" data-size="${l.id}" min="1" max="30" step="1" value="${l.size}">
+            <button type="button" class="step-btn" data-size-step="${l.id}" data-dir="-1" aria-label="减少"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+            <button type="button" class="step-btn" data-size-step="${l.id}" data-dir="1" aria-label="增加"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><line x1="12" y1="5" x2="12" y2="19"/></svg></button>
+            <button type="button" class="step-btn reset" data-size-reset="${l.id}" title="重置" aria-label="重置">${resetSvg}</button>
+          </div>
+          <div class="row-item">
+            <label>透明</label>
+            <span class="val" data-opacityval="${l.id}">${l.opacity}%</span>
+            <input type="range" data-opacity="${l.id}" min="10" max="100" step="5" value="${l.opacity}" title="仅影响之后新画的笔迹">
+            <button type="button" class="step-btn reset" data-opacity-reset="${l.id}" title="重置" aria-label="重置">${resetSvg}</button>
+          </div>
+          <div class="row-item layer-actions">
+            <button type="button" class="mini-btn" data-save-tpl="${l.id}" title="存为模板"${l.shapes.some(s => s.type !== 'erase') ? '' : ' disabled'}>存为模板</button>
+            <button type="button" class="mini-btn adjust-btn${adjustLayerId === l.id && adjustScope === 'layer' ? ' active' : ''}" data-adjustall="${l.id}" title="调整图层全部内容" aria-pressed="${adjustLayerId === l.id && adjustScope === 'layer' ? 'true' : 'false'}"${canAdjustLayer ? '' : ' disabled'}>调整图层</button>
+            <button type="button" class="mini-btn adjust-btn${adjustLayerId === l.id && adjustScope === 'last' ? ' active' : ''}" data-adjust="${l.id}" title="调整最后一笔" aria-pressed="${adjustLayerId === l.id && adjustScope === 'last' ? 'true' : 'false'}"${canAdjust ? '' : ' disabled'}>调整末笔</button>
+            <button type="button" class="mini-btn" data-undo="${l.id}" title="撤销末笔">撤销末笔</button>
+            <button type="button" class="mini-btn" data-merge="up" data-id="${l.id}" title="向上合并" aria-label="向上合并"${upDisabled ? ' disabled' : ''}>向上合并</button>
+            <button type="button" class="mini-btn" data-merge="down" data-id="${l.id}" title="向下合并" aria-label="向下合并"${downDisabled ? ' disabled' : ''}>向下合并</button>
+            <button type="button" class="mini-btn" data-copy="${l.id}" title="复制图层"${l.shapes.length ? '' : ' disabled'}>复制图层</button>
+            <button type="button" class="mini-btn danger" data-del="${l.id}" title="删除图层" aria-label="删除图层"${state.draw.layers.length <= 1 ? ' disabled' : ''}>删除图层</button>
+          </div>
+        </div>`;
+}
 
-document.getElementById('drawShow').addEventListener('change', e => { state.draw.show = e.target.checked; updateDrawActive(); });
+function renderDrawLayers() {
+  drawLayerBox.innerHTML = state.draw.layers.map(drawLayerCardHTML).join('');
+  syncActiveLayerSelect();
+  document.getElementById('drawMergeAll').disabled = state.draw.layers.length < 2;
+}
+
+// 拖动排序后按卡片当前位置同步合并按钮的可用状态
+function syncLayerMergeButtons() {
+  const cards = Array.from(drawLayerBox.querySelectorAll('.layer-card'));
+  cards.forEach((card, idx) => {
+    const up = card.querySelector('[data-merge="up"]');
+    const down = card.querySelector('[data-merge="down"]');
+    if (up) up.disabled = idx === 0;
+    if (down) down.disabled = idx === cards.length - 1;
+  });
+}
+
+// 笔迹变化后同步「存为模板」可用状态
+function syncLayerSaveButtons() {
+  state.draw.layers.forEach(l => {
+    const card = drawLayerBox.querySelector(`[data-layer="${l.id}"]`);
+    if (!card) return;
+    const saveBtn = card.querySelector('[data-save-tpl]');
+    if (saveBtn) saveBtn.disabled = !l.shapes.some(s => s.type !== 'erase');
+    // 调整按钮只在可调整时可用
+    const adjBtn = card.querySelector('[data-adjust]');
+    const last = l.shapes[l.shapes.length - 1];
+    if (adjBtn) adjBtn.disabled = !last || last.type === 'erase';
+    const adjAllBtn = card.querySelector('[data-adjustall]');
+    if (adjAllBtn) adjAllBtn.disabled = !l.shapes.some(s => s.type !== 'erase');
+    // 复制按钮：空图层无内容可复制
+    const copyBtn = card.querySelector('[data-copy]');
+    if (copyBtn) copyBtn.disabled = l.shapes.length === 0;
+  });
+  syncClearLayerBtn();
+}
+
+// 「清除图层」仅当前图层有笔迹时可用
+function syncClearLayerBtn() {
+  const btn = document.getElementById('drawClearLayer');
+  const l = activeDrawLayer();
+  if (btn) btn.disabled = !l || l.shapes.length === 0;
+}
+
+// 同步「通用」区当前图层下拉与上下切换按钮状态
+function syncActiveLayerSelect() {
+  const sel = document.getElementById('drawActiveLayer');
+  const prevBtn = document.getElementById('drawLayerPrev');
+  const nextBtn = document.getElementById('drawLayerNext');
+  if (!sel || !prevBtn || !nextBtn) return;
+  sel.innerHTML = state.draw.layers.map(l =>
+    `<option value="${l.id}">${escapeDrawName(l.name)}</option>`).join('');
+  sel.value = String(state.draw.activeId);
+  const idx = state.draw.layers.findIndex(l => l.id === state.draw.activeId);
+  sel.disabled = !!adjustLayerId;
+  prevBtn.disabled = !!adjustLayerId || idx <= 0;
+  nextBtn.disabled = !!adjustLayerId || idx < 0 || idx >= state.draw.layers.length - 1;
+  syncClearLayerBtn();
+  updateDrawCursorState();
+}
+function stepDrawLayer(dir) {
+  const idx = state.draw.layers.findIndex(l => l.id === state.draw.activeId);
+  const target = state.draw.layers[idx + dir];
+  if (target) activateDrawLayer(target.id);
+}
+
+function drawLayerById(id) {
+  return state.draw.layers.find(l => l.id === id);
+}
+
+function syncLayerColor(l) {
+  const sel = drawLayerBox.querySelector(`[data-color="${l.id}"]`);
+  const picker = drawLayerBox.querySelector(`[data-picker="${l.id}"]`);
+  if (!sel || !picker) return;
+  const isCustom = DRAW_PRESET_COLORS.indexOf(l.color) < 0;
+  sel.value = isCustom ? 'custom' : l.color;
+  sel.style.color = l.color === '#ffffff' ? '#999999' : l.color;
+  picker.classList.toggle('hidden', !isCustom);
+  if (isCustom) picker.value = l.color;
+}
+
+function activateDrawLayer(id) {
+  // 调整最后一笔时禁止切换图层
+  if (adjustLayerId) return;
+  if (state.draw.activeId === id) return;
+  state.draw.activeId = id;
+  for (const card of drawLayerBox.children) card.classList.toggle('active', Number(card.dataset.layer) === id);
+  syncActiveLayerSelect();
+  saveConfig();
+}
+
+// ==================== 调整最后一笔 ====================
+// 选中某图层后，该层最后一个笔触可拖拽、旋转、缩放，画布显示虚线辅助框；期间禁止切换图层
+
+// 当前调整目标：仅最后一笔，或图层内全部笔迹（含橡皮，保证整体一致移动）
+function adjustTargetShapes() {
+  const l = drawLayerById(adjustLayerId);
+  if (!l) return [];
+  if (adjustScope === 'layer') return l.shapes.slice();
+  const s = l.shapes[l.shapes.length - 1];
+  return s && s.type !== 'erase' ? [s] : [];
+}
+
+function shapeBounds(s) {
+  if (!s) return null;
+  if (s.type === 'free' && Array.isArray(s.points)) {
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    for (const p of s.points) {
+      minX = Math.min(minX, p.x); minY = Math.min(minY, p.y);
+      maxX = Math.max(maxX, p.x); maxY = Math.max(maxY, p.y);
+    }
+    if (!isFinite(minX)) return null;
+    return { minX, minY, maxX, maxY };
+  }
+  if (s.type === 'circle') {
+    const r = Math.hypot(s.x2 - s.x1, s.y2 - s.y1);
+    return { minX: s.x1 - r, minY: s.y1 - r, maxX: s.x1 + r, maxY: s.y1 + r };
+  }
+  if (s.type === 'triangle') {
+    // 三角形按三顶点实际位置计算包围盒
+    const dx = s.x2 - s.x1, dy = s.y2 - s.y1;
+    const len = Math.max(1, Math.hypot(dx, dy));
+    const base = Math.atan2(dy, dx);
+    const xs = [], ys = [];
+    for (const a of [0, 2.094, 4.189]) {
+      xs.push(s.x1 + len * Math.cos(base + a));
+      ys.push(s.y1 + len * Math.sin(base + a));
+    }
+    return { minX: Math.min(...xs), minY: Math.min(...ys), maxX: Math.max(...xs), maxY: Math.max(...ys) };
+  }
+  return {
+    minX: Math.min(s.x1, s.x2), minY: Math.min(s.y1, s.y2),
+    maxX: Math.max(s.x1, s.x2), maxY: Math.max(s.y1, s.y2),
+  };
+}
+
+// 辅助框：按笔迹包围盒外扩，避免细线框贴住笔迹
+function adjustBox(s) {
+  const b = shapeBounds(s);
+  if (!b) return null;
+  const pad = Math.max(6, (s.size || 3) / 2 + 5);
+  return { minX: b.minX - pad, minY: b.minY - pad, maxX: b.maxX + pad, maxY: b.maxY + pad };
+}
+
+function adjustHandles(box) {
+  return [
+    { x: box.minX, y: box.minY }, { x: box.maxX, y: box.minY },
+    { x: box.maxX, y: box.maxY }, { x: box.minX, y: box.maxY },
+  ];
+}
+
+function shapeRot(s) {
+  return s && typeof s.rot === 'number' ? s.rot : 0;
+}
+
+// 笔迹旋转后在画布上的实际包围盒
+function visualBounds(s) {
+  const b = shapeBounds(s);
+  if (!b) return null;
+  const rot = shapeRot(s);
+  if (!rot) return b;
+  const cx = (b.minX + b.maxX) / 2;
+  const cy = (b.minY + b.maxY) / 2;
+  const pts = adjustHandles(b).map(p => rotatePointAround(p, cx, cy, rot));
+  const xs = pts.map(p => p.x), ys = pts.map(p => p.y);
+  return { minX: Math.min(...xs), minY: Math.min(...ys), maxX: Math.max(...xs), maxY: Math.max(...ys) };
+}
+
+// 辅助框视角：末笔模式跟随笔迹自身角度；图层模式为所有内容的整体轴对齐外框
+function adjustFrameFor(shapes) {
+  if (adjustScope === 'layer') {
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    let maxSize = 3;
+    for (const s of shapes) {
+      const b = visualBounds(s);
+      if (!b) continue;
+      minX = Math.min(minX, b.minX); minY = Math.min(minY, b.minY);
+      maxX = Math.max(maxX, b.maxX); maxY = Math.max(maxY, b.maxY);
+      maxSize = Math.max(maxSize, s.size || 3);
+    }
+    if (!isFinite(minX)) return null;
+    const pad = Math.max(6, maxSize / 2 + 5);
+    const box = { minX: minX - pad, minY: minY - pad, maxX: maxX + pad, maxY: maxY + pad };
+    const cx = (box.minX + box.maxX) / 2;
+    const cy = (box.minY + box.maxY) / 2;
+    return {
+      box, cx, cy, rot: 0,
+      corners: adjustHandles(box),
+      topMid: { x: cx, y: box.minY },
+      handle: { x: cx, y: box.minY - 26 },
+    };
+  }
+  const s = shapes[0];
+  if (!s) return null;
+  const box = adjustBox(s);
+  if (!box) return null;
+  const cx = (box.minX + box.maxX) / 2;
+  const cy = (box.minY + box.maxY) / 2;
+  const rot = shapeRot(s);
+  const rotPoint = p => rotatePointAround(p, cx, cy, rot);
+  return {
+    box, cx, cy, rot,
+    corners: adjustHandles(box).map(rotPoint),
+    topMid: rotPoint({ x: cx, y: box.minY }),
+    handle: rotPoint({ x: cx, y: box.minY - 26 }),
+  };
+}
+
+function renderAdjustOverlay() {
+  const cv = document.getElementById('drawAdjustOverlay');
+  if (!cv) return;
+  if (!adjustLayerId) { cv.style.display = 'none'; return; }
+  const shapes = adjustTargetShapes();
+  if (!shapes.length) {
+    // 笔触被撤销/清除后自动退出调整模式
+    setAdjustLayer(null);
+    cv.style.display = 'none';
+    return;
+  }
+  const fr = adjustFrameFor(shapes);
+  if (!fr) return;
+  const physical = drawCanvas.width;
+  cv.width = physical;
+  cv.height = physical;
+  const ctx2 = cv.getContext('2d');
+  const scale = physical / (DESIGN + CANVAS_MARGIN * 2);
+  ctx2.setTransform(1, 0, 0, 1, 0, 0);
+  ctx2.clearRect(0, 0, physical, physical);
+  ctx2.setTransform(scale, 0, 0, scale, scale * CANVAS_MARGIN, scale * CANVAS_MARGIN);
+  ctx2.strokeStyle = '#1677ff';
+  ctx2.lineWidth = 1.4;
+  // 虚线辅助框（按旋转后的四角绘制）
+  ctx2.setLineDash([6, 4]);
+  ctx2.beginPath();
+  ctx2.moveTo(fr.corners[0].x, fr.corners[0].y);
+  for (let i = 1; i < fr.corners.length; i++) ctx2.lineTo(fr.corners[i].x, fr.corners[i].y);
+  ctx2.closePath();
+  ctx2.stroke();
+  ctx2.setLineDash([]);
+  // 旋转手柄
+  ctx2.beginPath();
+  ctx2.moveTo(fr.topMid.x, fr.topMid.y);
+  ctx2.lineTo(fr.handle.x, fr.handle.y);
+  ctx2.stroke();
+  ctx2.beginPath();
+  ctx2.arc(fr.handle.x, fr.handle.y, 6, 0, Math.PI * 2);
+  ctx2.fillStyle = '#fff';
+  ctx2.fill();
+  ctx2.stroke();
+  // 四角缩放点
+  for (const h of fr.corners) {
+    ctx2.beginPath();
+    ctx2.rect(h.x - 5, h.y - 5, 10, 10);
+    ctx2.fillStyle = '#fff';
+    ctx2.fill();
+    ctx2.stroke();
+  }
+  cv.style.display = 'block';
+}
+
+function syncAdjustOverlaySize() {
+  const cv = document.getElementById('drawAdjustOverlay');
+  if (!cv) return;
+  cv.width = drawCanvas.width;
+  cv.height = drawCanvas.height;
+  renderAdjustOverlay();
+}
+
+function rotatePointAround(p, cx, cy, ang) {
+  const dx = p.x - cx, dy = p.y - cy;
+  const c = Math.cos(ang), s = Math.sin(ang);
+  return { x: cx + dx * c - dy * s, y: cy + dx * s + dy * c };
+}
+
+// 以快照为基准写入变换结果，避免多次拖拽累计误差
+function transformShape(s, snap, mapPt, newSize) {
+  if (snap.type === 'free') {
+    s.points = snap.points.map(mapPt);
+  } else if (snap.type === 'circle') {
+    const a = mapPt({ x: snap.x1, y: snap.y1 });
+    const b = mapPt({ x: snap.x2, y: snap.y2 });
+    s.x1 = a.x; s.y1 = a.y; s.x2 = b.x; s.y2 = b.y;
+  } else {
+    const a = mapPt({ x: snap.x1, y: snap.y1 });
+    const b = mapPt({ x: snap.x2, y: snap.y2 });
+    s.x1 = a.x; s.y1 = a.y; s.x2 = b.x; s.y2 = b.y;
+  }
+  if (typeof snap.rot === 'number') s.rot = snap.rot;
+  s.size = newSize;
+}
+
+function adjustPointerDown(e) {
+  const shapes = adjustTargetShapes();
+  if (!shapes.length) return;
+  const fr = adjustFrameFor(shapes);
+  if (!fr) return;
+  const p = drawPos(e);
+  const near = a => Math.hypot(p.x - a.x, p.y - a.y) <= 16;
+  let mode = null, cornerIdx = -1;
+  if (near(fr.handle)) {
+    mode = 'rotate';
+  } else {
+    fr.corners.forEach((h, i) => {
+      if (!mode && near(h)) { mode = 'scale'; cornerIdx = i; }
+    });
+    if (!mode) {
+      // 旋转回局部坐标后判断是否落在框内
+      const lp = rotatePointAround(p, fr.cx, fr.cy, -fr.rot);
+      if (lp.x >= fr.box.minX && lp.x <= fr.box.maxX && lp.y >= fr.box.minY && lp.y <= fr.box.maxY) mode = 'move';
+    }
+  }
+  if (!mode) return;
+  adjustDrag = {
+    mode, cornerIdx, snapshots: JSON.parse(JSON.stringify(shapes)), start: p,
+    cx: fr.cx, cy: fr.cy, rot: fr.rot,
+    startAngle: Math.atan2(p.y - fr.cy, p.x - fr.cx),
+  };
+  if (mode === 'scale') {
+    const localCorner = adjustHandles(fr.box)[cornerIdx];
+    adjustDrag.localCorner = localCorner;
+    adjustDrag.anchor = {
+      x: localCorner.x === fr.box.minX ? fr.box.maxX : fr.box.minX,
+      y: localCorner.y === fr.box.minY ? fr.box.maxY : fr.box.minY,
+    };
+  }
+  document.body.classList.add('adjust-dragging');
+}
+
+function adjustPointerMove(e) {
+  if (!adjustDrag) return;
+  const shapes = adjustTargetShapes();
+  if (!shapes.length) return;
+  const snaps = adjustDrag.snapshots;
+  if (snaps.length !== shapes.length) return;
+  const p = drawPos(e);
+  if (adjustDrag.mode === 'move') {
+    const dx = p.x - adjustDrag.start.x;
+    const dy = p.y - adjustDrag.start.y;
+    shapes.forEach((s, i) => {
+      const sn = snaps[i];
+      transformShape(s, sn, pt => ({ x: pt.x + dx, y: pt.y + dy }), sn.size);
+    });
+  } else if (adjustDrag.mode === 'scale') {
+    const a = adjustDrag.anchor;
+    const lc = adjustDrag.localCorner;
+    const lp = rotatePointAround(p, adjustDrag.cx, adjustDrag.cy, -adjustDrag.rot);
+    const bw = lc.x - a.x;
+    const bh = lc.y - a.y;
+    const clampK = k => {
+      const sign = k < 0 ? -1 : 1;
+      return sign * Math.min(10, Math.max(0.08, Math.abs(k)));
+    };
+    let kx = Math.abs(bw) > 0.001 ? (lp.x - a.x) / bw : 1;
+    let ky = Math.abs(bh) > 0.001 ? (lp.y - a.y) / bh : 1;
+    kx = clampK(kx);
+    ky = clampK(ky);
+    shapes.forEach((s, i) => {
+      const sn = snaps[i];
+      let sx = kx, sy = ky;
+      // 圆形保持等比缩放，避免变成椭圆
+      if (sn.type === 'circle') {
+        const k = Math.sign(kx * ky) * Math.sqrt(Math.abs(kx * ky)) || 1;
+        sx = sy = k;
+      }
+      transformShape(s, sn, pt => ({
+        x: a.x + (pt.x - a.x) * sx,
+        y: a.y + (pt.y - a.y) * sy,
+      }), Math.max(1, Math.round(sn.size * Math.sqrt(Math.abs(sx * sy)))));
+    });
+  } else if (adjustDrag.mode === 'rotate') {
+    let ang = Math.atan2(p.y - adjustDrag.cy, p.x - adjustDrag.cx) - adjustDrag.startAngle;
+    ang = Math.atan2(Math.sin(ang), Math.cos(ang));
+    // 各笔迹绕整体中心转动，同时自身角度叠加
+    shapes.forEach((s, i) => {
+      const sn = snaps[i];
+      const b = shapeBounds(sn);
+      let dx = 0, dy = 0;
+      if (b) {
+        const pc = { x: (b.minX + b.maxX) / 2, y: (b.minY + b.maxY) / 2 };
+        const pc2 = rotatePointAround(pc, adjustDrag.cx, adjustDrag.cy, ang);
+        dx = pc2.x - pc.x;
+        dy = pc2.y - pc.y;
+      }
+      transformShape(s, sn, pt => ({ x: pt.x + dx, y: pt.y + dy }), sn.size);
+      s.rot = (typeof sn.rot === 'number' ? sn.rot : 0) + ang;
+    });
+  }
+  renderAllShapes();
+}
+
+function adjustPointerUp() {
+  if (!adjustDrag) return;
+  adjustDrag = null;
+  document.body.classList.remove('adjust-dragging');
+  saveConfig();
+  renderAdjustOverlay();
+}
+
+function setAdjustLayer(id) {
+  adjustLayerId = id || null;
+  adjustDrag = null;
+  document.body.classList.remove('adjust-dragging');
+  document.body.classList.toggle('adjust-on', !!adjustLayerId);
+  if (adjustLayerId) {
+    state.draw.activeId = adjustLayerId;
+  }
+  renderDrawLayers();
+  renderAdjustOverlay();
+}
+
+// 切换某图层的调整模式：scope=last 仅末笔，scope=layer 整个图层；选中期间不允许切换到其他图层
+function toggleAdjustLayer(id, scope) {
+  const targetScope = scope === 'layer' ? 'layer' : 'last';
+  if (adjustLayerId === id && adjustScope === targetScope) { setAdjustLayer(null); return; }
+  if (adjustLayerId) return;
+  const l = drawLayerById(id);
+  if (!l) return;
+  if (targetScope === 'layer') {
+    if (!l.shapes.some(s => s.type !== 'erase')) return;
+  } else {
+    const last = l.shapes[l.shapes.length - 1];
+    if (!last || last.type === 'erase') return;
+  }
+  adjustScope = targetScope;
+  setAdjustLayer(id);
+}
+
+function addDrawLayer(anchorId) {
+  // 调整模式下新增图层会切换当前层，禁止
+  if (adjustLayerId) return;
+  const d = state.draw;
+  const id = d.nextId++;
+  // 新图层插入到所点 + 按钮对应图层的上方（未指定时以当前图层为参照）
+  const anchor = d.layers.findIndex(l => l.id === (anchorId !== undefined ? anchorId : d.activeId));
+  d.layers.splice(anchor < 0 ? d.layers.length : anchor, 0, {
+    id, name: '图层' + String(id).padStart(2, '0'),
+    type: 'free', color: '#000000', custom: '#000000', size: 3, opacity: 100, visible: true, shapes: [],
+  });
+  d.activeId = id;
+  renderDrawLayers();
+  saveConfig();
+}
+
+// 复制当前图层为新图层（插到源图层上方，内容与参数一致）
+function copyDrawLayer(id) {
+  if (adjustLayerId) return;
+  const d = state.draw;
+  const idx = d.layers.findIndex(l => l.id === id);
+  if (idx < 0) return;
+  const src = d.layers[idx];
+  if (!src.shapes.length) return;
+  const copy = JSON.parse(JSON.stringify(src));
+  copy.id = d.nextId++;
+  copy.name = src.name + ' 副本';
+  d.layers.splice(idx, 0, copy);
+  d.activeId = copy.id;
+  renderDrawLayers();
+  renderAllShapes();
+  saveConfig();
+}
+
+function deleteDrawLayer(id) {
+  const d = state.draw;
+  if (d.layers.length <= 1) return;
+  if (id === adjustLayerId) setAdjustLayer(null);
+  d.layers = d.layers.filter(l => l.id !== id);
+  if (d.activeId === id) d.activeId = d.layers[d.layers.length - 1].id;
+  renderDrawLayers();
+  renderAllShapes();
+  saveConfig();
+}
+
+// 合并图层：dir=-1 合并到列表上一张，dir=1 合并到下一张，名称以目标图层为准
+function mergeDrawLayer(id, dir) {
+  const d = state.draw;
+  const i = d.layers.findIndex(l => l.id === id);
+  const j = i + dir;
+  if (i < 0 || j < 0 || j >= d.layers.length) return;
+  const src = d.layers[i], target = d.layers[j];
+  // 数组顺序即绘制顺序，按原叠放关系拼接笔迹
+  target.shapes = dir < 0 ? [...target.shapes, ...src.shapes] : [...src.shapes, ...target.shapes];
+  d.layers.splice(i, 1);
+  d.activeId = target.id;
+  renderDrawLayers();
+  renderAllShapes();
+  saveConfig();
+}
+
+// ============ 画板模板：生成内置图案到新图层 ============
+// 模板坐标使用 600×600 设计坐标；sw 为相对当前粗细的倍数
+const DRAW_TPL_CATEGORIES = [
+  {
+    id: 'basic', name: '基础',
+    items: [
+      { id: 'arrow', name: '箭头', make: () => [
+        { type: 'line', x1: 130, y1: 300, x2: 470, y2: 300 },
+        { type: 'free', points: [{ x: 408, y: 246 }, { x: 470, y: 300 }, { x: 408, y: 354 }] },
+      ] },
+      { id: 'arrow2', name: '双向箭头', make: () => [
+        { type: 'line', x1: 130, y1: 300, x2: 470, y2: 300 },
+        { type: 'free', points: [{ x: 192, y: 246 }, { x: 130, y: 300 }, { x: 192, y: 354 }] },
+        { type: 'free', points: [{ x: 408, y: 246 }, { x: 470, y: 300 }, { x: 408, y: 354 }] },
+      ] },
+      { id: 'dash', name: '虚线', make: () => {
+        const arr = [];
+        for (let i = 0; i < 6; i++) arr.push({ type: 'line', x1: 130 + i * 60, y1: 300, x2: 160 + i * 60, y2: 300 });
+        return arr;
+      } },
+      { id: 'box', name: '方框', make: () => [{ type: 'rect', x1: 170, y1: 170, x2: 430, y2: 430 }] },
+      { id: 'circle', name: '圆形', make: () => [{ type: 'circle', x1: 300, y1: 300, x2: 480, y2: 300 }] },
+      { id: 'triangle', name: '三角形', make: () => [{ type: 'triangle', x1: 300, y1: 470, x2: 300, y2: 170 }] },
+    ],
+  },
+  {
+    id: 'mark', name: '标记',
+    items: [
+      { id: 'check', name: '对勾', make: () => [
+        { type: 'free', points: [{ x: 190, y: 320 }, { x: 280, y: 410 }, { x: 430, y: 210 }] },
+      ] },
+      { id: 'cross', name: '叉号', make: () => [
+        { type: 'line', x1: 210, y1: 210, x2: 390, y2: 390 },
+        { type: 'line', x1: 390, y1: 210, x2: 210, y2: 390 },
+      ] },
+      { id: 'excl', name: '感叹号', make: () => [
+        { type: 'line', x1: 300, y1: 170, x2: 300, y2: 350 },
+        { type: 'line', x1: 300, y1: 405, x2: 300, y2: 406 },
+      ] },
+      { id: 'quest', name: '问号', make: () => [
+        { type: 'free', points: [{ x: 245, y: 235 }, { x: 270, y: 205 }, { x: 310, y: 195 }, { x: 350, y: 210 }, { x: 365, y: 245 }, { x: 350, y: 280 }, { x: 310, y: 310 }, { x: 300, y: 345 }, { x: 300, y: 372 }] },
+        { type: 'line', x1: 300, y1: 412, x2: 300, y2: 413 },
+      ] },
+    ],
+  },
+  {
+    id: 'pattern', name: '图案',
+    items: [
+      { id: 'rings', name: '同心圆', make: () => [70, 130, 190].map(r => ({ type: 'circle', x1: 300, y1: 300, x2: 300 + r, y2: 300, sw: 0.7 })) },
+      { id: 'spiral', name: '螺旋', make: () => {
+        const pts = [];
+        for (let i = 0; i <= 160; i++) {
+          const t = i / 160, ang = t * Math.PI * 6, rad = 16 + t * 175;
+          pts.push({ x: 300 + rad * Math.cos(ang), y: 300 + rad * Math.sin(ang) });
+        }
+        return [{ type: 'free', points: pts }];
+      } },
+      { id: 'wave', name: '波浪', make: () => {
+        const pts = [];
+        for (let i = 0; i <= 40; i++) pts.push({ x: 100 + i * 10, y: 300 + Math.sin(i / 40 * Math.PI * 4) * 70 });
+        return [{ type: 'free', points: pts }];
+      } },
+      { id: 'star', name: '五角星', make: () => {
+        const pts = [];
+        for (let i = 0; i < 10; i++) {
+          const ang = -Math.PI / 2 + i * Math.PI / 5, rad = i % 2 === 0 ? 190 : 76;
+          pts.push({ x: 300 + rad * Math.cos(ang), y: 300 + rad * Math.sin(ang) });
+        }
+        pts.push({ ...pts[0] });
+        return [{ type: 'free', points: pts }];
+      } },
+      { id: 'grid', name: '网格', make: () => {
+        const arr = [];
+        [150, 250, 350, 450].forEach(v => {
+          arr.push({ type: 'line', x1: v, y1: 100, x2: v, y2: 500, sw: 0.7 });
+          arr.push({ type: 'line', x1: 100, y1: v, x2: 500, y2: v, sw: 0.7 });
+        });
+        return arr;
+      } },
+    ],
+  },
+  {
+    // 字框：外框尺寸与田字格一致（边长 410，居中于画布），只生成装饰外框
+    id: 'frame', name: '字框',
+    items: [
+      { id: 'frame-leaf', name: '枝蔓框', make: () => {
+        const arr = [];
+        [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(([sx, sy]) => {
+          const ang = Math.atan2(sy, sx) * 180 / Math.PI;
+          arr.push(...tplBranch(300 + sx * 214, 300 + sy * 214, ang));
+        });
+        return arr;
+      } },
+      { id: 'frame-flower', name: '花角框', make: () => {
+        const arr = [];
+        [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(([sx, sy]) => {
+          arr.push(...tplFlower(300 + sx * 222, 300 + sy * 222, 7));
+        });
+        return arr;
+      } },
+    ],
+  },
+];
+
+// 字框装饰元素：枝干与叶片、五瓣小花
+function tplLeaf(x, y, angDeg, len) {
+  const a = angDeg * Math.PI / 180, ca = Math.cos(a), sa = Math.sin(a);
+  const pts = [[0, 0], [0.3 * len, -0.26 * len], [0.65 * len, -0.16 * len], [len, 0], [0.65 * len, 0.16 * len], [0.3 * len, 0.26 * len], [0, 0]]
+    .map(([px, py]) => ({ x: x + px * ca - py * sa, y: y + px * sa + py * ca }));
+  return { type: 'free', points: pts, sw: 0.6 };
+}
+function tplBranch(cx, cy, angDeg) {
+  const a = angDeg * Math.PI / 180, dx = Math.cos(a), dy = Math.sin(a);
+  return [
+    { type: 'line', x1: cx, y1: cy, x2: cx + dx * 40, y2: cy + dy * 40, sw: 0.7 },
+    tplLeaf(cx + dx * 14, cy + dy * 14, angDeg - 35, 20),
+    tplLeaf(cx + dx * 20, cy + dy * 20, angDeg + 35, 20),
+    tplLeaf(cx + dx * 36, cy + dy * 36, angDeg - 12, 18),
+  ];
+}
+function tplFlower(cx, cy, pr) {
+  const arr = [];
+  for (let i = 0; i < 5; i++) {
+    const ang = -Math.PI / 2 + i * Math.PI * 2 / 5;
+    const px = cx + Math.cos(ang) * 11, py = cy + Math.sin(ang) * 11;
+    arr.push({ type: 'circle', x1: px, y1: py, x2: px + pr, y2: py, sw: 0.5 });
+  }
+  arr.push({ type: 'line', x1: cx, y1: cy - 2, x2: cx, y2: cy - 1, sw: 0.9 });
+  return arr;
+}
+
+function drawTplItem(id) {
+  for (const c of DRAW_TPL_CATEGORIES) {
+    const it = c.items.find(x => x.id === id);
+    if (it) return it;
+  }
+  const saved = savedTpls.find(t => t.id === id);
+  return saved ? { id: saved.id, name: saved.name, color: saved.color, custom: saved.custom, opacity: saved.opacity, make: () => saved.shapes } : null;
+}
+// 模板缩略图：把内置图形转成 SVG
+function tplShapeSVG(s) {
+  if (s.type === 'free') {
+    return `<polyline points="${s.points.map(p => Math.round(p.x) + ',' + Math.round(p.y)).join(' ')}"/>`;
+  }
+  if (s.type === 'line') return `<line x1="${s.x1}" y1="${s.y1}" x2="${s.x2}" y2="${s.y2}"/>`;
+  if (s.type === 'rect') {
+    return `<rect x="${Math.min(s.x1, s.x2)}" y="${Math.min(s.y1, s.y2)}" width="${Math.abs(s.x2 - s.x1)}" height="${Math.abs(s.y2 - s.y1)}"/>`;
+  }
+  if (s.type === 'circle') {
+    return `<circle cx="${s.x1}" cy="${s.y1}" r="${Math.hypot(s.x2 - s.x1, s.y2 - s.y1)}"/>`;
+  }
+  if (s.type === 'triangle') {
+    const dx = s.x2 - s.x1, dy = s.y2 - s.y1;
+    const len = Math.max(1, Math.hypot(dx, dy)), ang = Math.atan2(dy, dx);
+    const pts = [0, 2.094, 4.189]
+      .map(a => Math.round(s.x1 + len * Math.cos(ang + a)) + ',' + Math.round(s.y1 + len * Math.sin(ang + a)));
+    return `<polygon points="${pts.join(' ')}"/>`;
+  }
+  return '';
+}
+function tplPreviewSVG(shapes) {
+  return `<svg viewBox="0 0 600 600" fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${shapes.map(tplShapeSVG).join('')}</svg>`;
+}
+
+// 自定义模板：保存图层笔迹，按分类出现在模板浮层中
+const TPL_STORE_KEY = 'eyeTools.tpl';
+let savedTpls = [];
+function loadSavedTpls() {
+  try {
+    const arr = JSON.parse(localStorage.getItem(TPL_STORE_KEY) || '[]');
+    savedTpls = Array.isArray(arr) ? arr.filter(t => t && t.id && t.name && Array.isArray(t.shapes)) : [];
+  } catch { savedTpls = []; }
+}
+function persistSavedTpls() {
+  try { localStorage.setItem(TPL_STORE_KEY, JSON.stringify(savedTpls)); } catch {}
+}
+// 分类列表：自定义模板分类在最前，其后为内置分类
+function tplCatList() {
+  return [{ id: 'mine', name: '我的' }, ...DRAW_TPL_CATEGORIES.map(c => ({ id: c.id, name: c.name }))];
+}
+// 某分类下的模板：内置在前，自定义在后
+function tplItemsForCat(catId) {
+  const built = (DRAW_TPL_CATEGORIES.find(c => c.id === catId) || { items: [] }).items;
+  const custom = savedTpls
+    .filter(t => t.cat === catId)
+    .map(t => ({ id: t.id, name: t.name, color: t.color, custom: t.custom, opacity: t.opacity, saved: true, make: () => t.shapes }));
+  return [...built, ...custom];
+}
+
+let drawTplCat = DRAW_TPL_CATEGORIES[0].id;
+function renderDrawTplCats() {
+  document.getElementById('drawTplCats').innerHTML = tplCatList()
+    .map(c => `<button type="button" class="draw-tpl-cat${c.id === drawTplCat ? ' active' : ''}" data-cat="${c.id}">${c.name}</button>`).join('');
+}
+function renderDrawTplList() {
+  const items = tplItemsForCat(drawTplCat);
+  document.getElementById('drawTplList').innerHTML = items.length
+    ? items.map(it => `
+        <div class="draw-tpl-item">
+          <div class="draw-tpl-thumb">${tplPreviewSVG(it.make())}</div>
+          <div class="draw-tpl-name" title="${it.name}">${it.name}</div>
+          <div class="draw-tpl-actions">
+            <button type="button" class="mini-btn" data-tpl-gen="${it.id}">生成</button>
+            ${it.saved ? `<button type="button" class="mini-btn danger" data-tpl-del="${it.id}">删除</button>` : ''}
+          </div>
+        </div>`).join('')
+    : '<div class="draw-tpl-empty">该分类下暂无模板</div>';
+}
+function positionDrawTplPop() {
+  const pop = document.getElementById('drawTplPop');
+  const r = document.getElementById('drawTplBtn').getBoundingClientRect();
+  const w = pop.offsetWidth, h = pop.offsetHeight;
+  pop.style.left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8)) + 'px';
+  let top = r.bottom + 6;
+  if (top + h > window.innerHeight - 8) top = Math.max(8, r.top - h - 6);
+  pop.style.top = top + 'px';
+}
+function toggleDrawTplPop() {
+  const pop = document.getElementById('drawTplPop');
+  if (!pop.hidden) { pop.hidden = true; return; }
+  renderDrawTplCats();
+  renderDrawTplList();
+  pop.hidden = false;
+  positionDrawTplPop();
+}
+// 生成模板：新建图层（置于当前层上方）并写入图形，沿用当前层的颜色/粗细/透明度
+function generateDrawTemplate(item) {
+  const d = state.draw;
+  if (!d.show) {
+    const sw = document.getElementById('drawShow');
+    if (!sw.checked) { sw.checked = true; sw.dispatchEvent(new Event('change', { bubbles: true })); }
+  }
+  const src = activeDrawLayer();
+  const id = d.nextId++;
+  const tplColor = item.color || src.color;
+  const shapes = JSON.parse(JSON.stringify(item.make())).map(s => {
+    s.color = s.color || tplColor;
+    s.size = Math.max(1, Math.round(src.size * (s.sw || 1)));
+    delete s.sw;
+    return s;
+  });
+  const idx = d.layers.findIndex(l => l.id === d.activeId);
+  d.layers.splice(idx < 0 ? d.layers.length : idx, 0, {
+    id, name: item.name, type: 'free', color: tplColor, custom: item.custom || src.custom,
+    size: src.size, opacity: item.opacity || src.opacity, visible: true, shapes,
+  });
+  d.activeId = id;
+  renderDrawLayers();
+  renderAllShapes();
+  saveConfig();
+}
+document.getElementById('drawTplBtn').addEventListener('click', e => {
+  e.stopPropagation();
+  toggleDrawTplPop();
+});
+document.getElementById('drawTplCats').addEventListener('click', e => {
+  const b = e.target.closest('[data-cat]');
+  if (!b) return;
+  drawTplCat = b.dataset.cat;
+  renderDrawTplCats();
+  renderDrawTplList();
+});
+document.getElementById('drawTplList').addEventListener('click', e => {
+  const delBtn = e.target.closest('[data-tpl-del]');
+  if (delBtn) {
+    const id = delBtn.dataset.tplDel;
+    const tpl = savedTpls.find(t => t.id === id);
+    if (!tpl) return;
+    showDataModal({
+      title: '删除模板',
+      message: `确定删除模板「${tpl.name}」吗？`,
+      okText: '删除',
+      showCancel: true,
+      onOk: () => {
+        savedTpls = savedTpls.filter(t => t.id !== id);
+        persistSavedTpls();
+        renderDrawTplList();
+      },
+    });
+    return;
+  }
+  const g = e.target.closest('[data-tpl-gen]');
+  if (!g) return;
+  const item = drawTplItem(g.dataset.tplGen);
+  if (!item) return;
+  generateDrawTemplate(item);
+  document.getElementById('drawTplPop').hidden = true;
+});
+document.addEventListener('pointerdown', e => {
+  const pop = document.getElementById('drawTplPop');
+  if (pop.hidden) return;
+  if (e.target.closest('#drawTplPop') || e.target.closest('#drawTplBtn')) return;
+  pop.hidden = true;
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.getElementById('drawTplPop').hidden = true;
+});
+window.addEventListener('resize', () => {
+  const pop = document.getElementById('drawTplPop');
+  if (!pop.hidden) positionDrawTplPop();
+});
+
+// 存为模板浮层：选择分类、命名后保存当前图层笔迹
+let tplSaveLayerId = null;
+function openTplSaveModal(id) {
+  const layer = drawLayerById(id);
+  if (!layer || !layer.shapes.some(s => s.type !== 'erase')) return;
+  tplSaveLayerId = id;
+  const sel = document.getElementById('tplSaveCat');
+  sel.innerHTML = tplCatList().map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+  sel.value = 'mine';
+  const inp = document.getElementById('tplSaveName');
+  inp.value = layer.name;
+  document.getElementById('tplSaveMask').classList.add('show');
+  setTimeout(() => { inp.focus(); inp.select(); }, 0);
+}
+function closeTplSaveModal() {
+  document.getElementById('tplSaveMask').classList.remove('show');
+  tplSaveLayerId = null;
+}
+function saveTplFromLayer() {
+  const layer = drawLayerById(tplSaveLayerId);
+  if (!layer) { closeTplSaveModal(); return; }
+  const name = (document.getElementById('tplSaveName').value || '').trim() || layer.name;
+  const cat = document.getElementById('tplSaveCat').value;
+  const base = layer.size || 3;
+  // 记录相对粗细用于预览，颜色与透明度随笔迹保留，生成时还原模板原有墨色
+  const shapes = JSON.parse(JSON.stringify(layer.shapes))
+    .filter(s => s.type !== 'erase')
+    .map(s => {
+      s.sw = Math.round(((s.size || base) / base) * 100) / 100;
+      delete s.size;
+      return s;
+    });
+  if (shapes.length) {
+    savedTpls.push({ id: 'saved-' + Date.now(), name, cat, color: layer.color, custom: layer.custom, opacity: layer.opacity, shapes });
+    persistSavedTpls();
+  }
+  closeTplSaveModal();
+}
+document.getElementById('tplSaveOk').addEventListener('click', saveTplFromLayer);
+document.getElementById('tplSaveCancel').addEventListener('click', closeTplSaveModal);
+document.getElementById('tplSaveClose').addEventListener('click', closeTplSaveModal);
+document.getElementById('tplSaveMask').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeTplSaveModal();
+});
+document.getElementById('tplSaveName').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); saveTplFromLayer(); }
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && document.getElementById('tplSaveMask').classList.contains('show')) closeTplSaveModal();
+});
+loadSavedTpls();
+
+// ============ 拖动图层标题调整顺序（仅在图层卡片之间生效） ============
+let layerDrag = null;
+
+// 拖拽开始：原位置放占位框，卡片浮起跟随指针
+function beginLayerDrag(e) {
+  const card = layerDrag.card;
+  const rect = card.getBoundingClientRect();
+  const ph = document.createElement('div');
+  ph.className = 'layer-drop-placeholder';
+  ph.style.height = rect.height + 'px';
+  drawLayerBox.insertBefore(ph, card);
+  card.classList.add('dragging');
+  card.style.position = 'fixed';
+  card.style.left = rect.left + 'px';
+  card.style.top = rect.top + 'px';
+  card.style.width = rect.width + 'px';
+  card.style.margin = '0';
+  card.style.zIndex = '90';
+  card.style.pointerEvents = 'none';
+  layerDrag.ph = ph;
+  layerDrag.offsetX = e.clientX - rect.left;
+  layerDrag.offsetY = e.clientY - rect.top;
+  activateDrawLayer(layerDrag.id);
+}
+function resetLayerCardStyles(card) {
+  ['position', 'left', 'top', 'width', 'margin', 'z-index', 'pointer-events']
+    .forEach(p => card.style.removeProperty(p));
+  card.classList.remove('dragging');
+}
+drawLayerBox.addEventListener('pointerdown', e => {
+  if (e.button !== 0) return;
+  const header = e.target.closest('.layer-card > .header');
+  if (!header) return;
+  // 标题右侧的显示开关不参与拖拽
+  if (e.target.closest('.switch')) return;
+  const card = header.parentElement;
+  layerDrag = {
+    id: Number(card.dataset.layer), card, ph: null,
+    startX: e.clientX, startY: e.clientY,
+    offsetX: 0, offsetY: 0,
+    origNext: card.nextSibling,
+    active: false, pointerId: e.pointerId,
+  };
+  try { header.setPointerCapture(e.pointerId); } catch (err) { /* 指针已失效时忽略 */ }
+});
+drawLayerBox.addEventListener('pointermove', e => {
+  if (!layerDrag || e.pointerId !== layerDrag.pointerId) return;
+  if (!layerDrag.active) {
+    if (Math.abs(e.clientX - layerDrag.startX) < 5 && Math.abs(e.clientY - layerDrag.startY) < 5) return;
+    layerDrag.active = true;
+    beginLayerDrag(e);
+  }
+  e.preventDefault();
+  const card = layerDrag.card;
+  card.style.left = (e.clientX - layerDrag.offsetX) + 'px';
+  card.style.top = (e.clientY - layerDrag.offsetY) + 'px';
+  const overEl = document.elementFromPoint(e.clientX, e.clientY);
+  const overCard = overEl && overEl.closest('.layer-card');
+  if (!overCard || overCard === card || !drawLayerBox.contains(overCard)) return;
+  const rect = overCard.getBoundingClientRect();
+  const selfRect = card.getBoundingClientRect();
+  // 同一行内按水平中点判断，跨行时按垂直中点判断（网格多列布局同样适用）
+  const sameRow = Math.abs(rect.top - selfRect.top) < 8;
+  const after = sameRow ? e.clientX > rect.left + rect.width / 2 : e.clientY > rect.top + rect.height / 2;
+  if (after) {
+    if (layerDrag.ph.previousElementSibling === overCard) return;
+    drawLayerBox.insertBefore(layerDrag.ph, overCard.nextSibling);
+  } else {
+    if (layerDrag.ph.nextElementSibling === overCard) return;
+    drawLayerBox.insertBefore(layerDrag.ph, overCard);
+  }
+});
+function endLayerDrag(e) {
+  if (!layerDrag) return;
+  if (e && e.pointerId !== undefined && e.pointerId !== layerDrag.pointerId) return;
+  const drag = layerDrag;
+  layerDrag = null;
+  if (!drag.active) return;
+  const cancelled = e && e.type === 'pointercancel';
+  if (cancelled && drag.origNext && drag.origNext.parentNode === drawLayerBox) {
+    drawLayerBox.insertBefore(drag.card, drag.origNext);
+  } else if (drag.ph) {
+    drawLayerBox.insertBefore(drag.card, drag.ph);
+  }
+  if (drag.ph) drag.ph.remove();
+  resetLayerCardStyles(drag.card);
+  if (cancelled) return;
+  // 按 DOM 顺序回写图层数组，并重绘画布（图层顺序即叠放顺序）
+  const order = Array.from(drawLayerBox.children)
+    .filter(el => el.classList.contains('layer-card'))
+    .map(el => Number(el.dataset.layer));
+  state.draw.layers.sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id));
+  syncLayerMergeButtons();
+  syncActiveLayerSelect();
+  renderAllShapes();
+  saveConfig();
+}
+drawLayerBox.addEventListener('pointerup', endLayerDrag);
+drawLayerBox.addEventListener('pointercancel', endLayerDrag);
+window.addEventListener('pointerup', endLayerDrag);
+
+drawLayerBox.addEventListener('focusin', e => {
+  const card = e.target.closest('.layer-card');
+  if (card) activateDrawLayer(Number(card.dataset.layer));
+});
+drawLayerBox.addEventListener('click', e => {
+  const card = e.target.closest('.layer-card');
+  if (!card) return;
+  const id = Number(card.dataset.layer);
+  activateDrawLayer(id);
+  const addBtn = e.target.closest('[data-add]');
+  if (addBtn) { addDrawLayer(Number(addBtn.dataset.add)); return; }
+  const adjustBtn = e.target.closest('[data-adjust]');
+  if (adjustBtn) { toggleAdjustLayer(Number(adjustBtn.dataset.adjust), 'last'); return; }
+  const adjustAllBtn = e.target.closest('[data-adjustall]');
+  if (adjustAllBtn) { toggleAdjustLayer(Number(adjustAllBtn.dataset.adjustall), 'layer'); return; }
+  const copyBtn = e.target.closest('[data-copy]');
+  if (copyBtn) {
+    const copyId = Number(copyBtn.dataset.copy);
+    const copyLayer = drawLayerById(copyId);
+    if (copyLayer && copyLayer.shapes.length) {
+      showDataModal({
+        title: '复制图层',
+        message: `确定复制「${copyLayer.name}」为新图层吗？`,
+        okText: '复制', showCancel: true,
+        onOk: () => copyDrawLayer(copyId),
+      });
+    }
+    return;
+  }
+  const saveTplBtn = e.target.closest('[data-save-tpl]');
+  if (saveTplBtn) {
+    openTplSaveModal(Number(saveTplBtn.dataset.saveTpl));
+    return;
+  }
+  const mergeBtn = e.target.closest('[data-merge]');
+  if (mergeBtn) {
+    const mergeId = Number(mergeBtn.dataset.id);
+    const dir = mergeBtn.dataset.merge === 'up' ? -1 : 1;
+    const mi = state.draw.layers.findIndex(item => item.id === mergeId);
+    const mj = mi + dir;
+    const src = state.draw.layers[mi];
+    if (!src || mj < 0 || mj >= state.draw.layers.length) return;
+    const target = state.draw.layers[mj];
+    showDataModal({
+      title: '合并图层',
+      message: `确定将「${src.name}」合并到${dir < 0 ? '上' : '下'}方图层「${target.name}」吗？合并后「${src.name}」将被移除。`,
+      okText: '合并',
+      showCancel: true,
+      onOk: () => mergeDrawLayer(mergeId, dir),
+    });
+    return;
+  }
+  const delBtn = e.target.closest('[data-del]');
+  if (delBtn) {
+    const delId = Number(delBtn.dataset.del);
+    const delLayer = drawLayerById(delId);
+    if (delLayer) {
+      showDataModal({
+        title: '删除图层',
+        message: `确定删除「${delLayer.name}」及其笔迹吗？`,
+        okText: '删除',
+        showCancel: true,
+        onOk: () => deleteDrawLayer(delId),
+      });
+    }
+    return;
+  }
+  const undoBtn = e.target.closest('[data-undo]');
+  if (undoBtn) { undoDraw(Number(undoBtn.dataset.undo)); return; }
+  const l = drawLayerById(id);
+  if (!l) return;
+  const typeReset = e.target.closest('[data-reset-type]');
+  if (typeReset) {
+    l.type = 'free';
+    card.querySelector(`[data-type="${id}"]`).value = 'free';
+    saveConfig(); return;
+  }
+  const colorReset = e.target.closest('[data-reset-color]');
+  if (colorReset) {
+    l.color = '#000000';
+    syncLayerColor(l);
+    saveConfig(); return;
+  }
+  const sizeReset = e.target.closest('[data-size-reset]');
+  if (sizeReset) {
+    l.size = 3;
+    card.querySelector(`[data-size="${id}"]`).value = 3;
+    card.querySelector(`[data-sizeval="${id}"]`).textContent = '3';
+    saveConfig();
+    refreshEraserCursor();
+    return;
+  }
+  const sizeStep = e.target.closest('[data-size-step]');
+  if (sizeStep) {
+    const dir = Number(sizeStep.dataset.dir);
+    l.size = Math.min(30, Math.max(1, l.size + dir));
+    card.querySelector(`[data-size="${id}"]`).value = l.size;
+    card.querySelector(`[data-sizeval="${id}"]`).textContent = String(l.size);
+    saveConfig();
+    refreshEraserCursor();
+    return;
+  }
+  const opacityReset = e.target.closest('[data-opacity-reset]');
+  if (opacityReset) {
+    l.opacity = 100;
+    card.querySelector(`[data-opacity="${id}"]`).value = 100;
+    card.querySelector(`[data-opacityval="${id}"]`).textContent = '100%';
+    saveConfig();
+  }
+});
+drawLayerBox.addEventListener('input', e => {
+  const t = e.target;
+  const id = Number(t.dataset.name || t.dataset.size || t.dataset.opacity || t.dataset.picker);
+  const l = id && drawLayerById(id);
+  if (!l) return;
+  if (t.dataset.name !== undefined) {
+    const v = t.value.trim();
+    if (v) l.name = v;
+    syncActiveLayerSelect();
+  } else if (t.dataset.size !== undefined) {
+    l.size = parseFloat(t.value);
+    drawLayerBox.querySelector(`[data-sizeval="${l.id}"]`).textContent = t.value;
+    saveConfig();
+    refreshEraserCursor();
+  } else if (t.dataset.opacity !== undefined) {
+    l.opacity = parseFloat(t.value);
+    drawLayerBox.querySelector(`[data-opacityval="${l.id}"]`).textContent = t.value + '%';
+    saveConfig();
+  } else if (t.dataset.picker !== undefined) {
+    l.color = t.value;
+    const sel = drawLayerBox.querySelector(`[data-color="${l.id}"]`);
+    sel.style.color = l.color === '#ffffff' ? '#999999' : l.color;
+    saveConfig();
+  }
+});
+drawLayerBox.addEventListener('change', e => {
+  const t = e.target;
+  const id = Number(t.dataset.name || t.dataset.type || t.dataset.color || t.dataset.picker || t.dataset.visible);
+  const l = id && drawLayerById(id);
+  if (!l) return;
+  if (t.dataset.visible !== undefined) {
+    l.visible = t.checked;
+    // 图层显示开关不反向影响画板分组开关
+    updateDrawCursorState();
+    renderAllShapes();
+    saveConfig();
+    return;
+  }
+  if (t.dataset.name !== undefined) {
+    // 名称不能为空：失焦时回退到上一个有效名称
+    t.value = l.name;
+    syncActiveLayerSelect();
+    saveConfig();
+  } else if (t.dataset.type !== undefined) {
+    l.type = t.value;
+    saveConfig();
+  } else if (t.dataset.color !== undefined) {
+    if (t.value === 'custom') {
+      const picker = drawLayerBox.querySelector(`[data-picker="${l.id}"]`);
+      picker.classList.remove('hidden');
+      l.color = picker.value;
+      t.style.color = l.color;
+    } else {
+      drawLayerBox.querySelector(`[data-picker="${l.id}"]`).classList.add('hidden');
+      l.color = t.value;
+      t.style.color = l.color === '#ffffff' ? '#999999' : l.color;
+    }
+    saveConfig();
+  }
+});
+
+renderDrawLayers();
+
+// 通用区：当前图层下拉切换 + 上/下按钮切换
+document.getElementById('drawActiveLayer').addEventListener('change', e => {
+  activateDrawLayer(Number(e.target.value));
+});
+document.getElementById('drawLayerPrev').addEventListener('click', () => stepDrawLayer(-1));
+document.getElementById('drawLayerNext').addEventListener('click', () => stepDrawLayer(1));
+
+document.getElementById('drawShow').addEventListener('change', e => {
+  state.draw.show = e.target.checked;
+  // 分组显示与各图层显示联动
+  state.draw.layers.forEach(l => l.visible = e.target.checked);
+  renderDrawLayers();
+  renderAllShapes();
+  updateDrawActive();
+  updateEraserCursorState();
+  drawDrawBorder();
+});
 document.getElementById('drawBorder').addEventListener('change', e => { state.draw.border = e.target.checked; drawDrawBorder(); });
-document.getElementById('drawType').addEventListener('change', e => state.draw.type = e.target.value);
-document.getElementById('drawSize').addEventListener('input', e => { state.draw.size = parseFloat(e.target.value); document.getElementById('drawSizeVal').textContent = e.target.value; });
-document.getElementById('drawEraser').addEventListener('change', e => {
-  state.draw.eraser = e.target.checked;
-  const disabled = e.target.checked;
-  document.getElementById('drawType').disabled = disabled;
-  document.getElementById('drawColor').disabled = disabled;
-});
-document.getElementById('drawUndo').addEventListener('click', undoDraw);
-document.getElementById('drawClear').addEventListener('click', clearDraw);
-
-// 类型重置
-document.querySelector('[data-reset-type="drawType"]').addEventListener('click', () => {
-  const t = document.getElementById('drawType'); t.value = 'free'; state.draw.type = 'free';
-});
-// 颜色重置
-document.querySelector('[data-reset-color="drawColor"]').addEventListener('click', () => {
-  drawColorSel.value = '#000000'; syncDrawColor();
+document.getElementById('drawEraser').addEventListener('change', e => { state.draw.eraser = e.target.checked; updateEraserCursorState(); });
+document.getElementById('drawClear').addEventListener('click', () => {
+  showDataModal({
+    title: '清除画板',
+    message: '确定清除所有图层的笔迹吗？',
+    okText: '清除',
+    showCancel: true,
+    onOk: clearDraw,
+  });
 });
 
-syncDrawColor();
+// 清除当前选中图层的全部笔迹（其他图层不受影响）
+document.getElementById('drawClearLayer').addEventListener('click', () => {
+  const l = activeDrawLayer();
+  if (!l || !l.shapes.length) return;
+  showDataModal({
+    title: '清除图层',
+    message: `确定清除当前图层「${l.name}」的全部笔迹吗？`,
+    okText: '清除',
+    showCancel: true,
+    onOk: () => {
+      l.shapes = [];
+      renderAllShapes();
+      saveConfig();
+    },
+  });
+});
+
+// 合并全部图层到当前图层，笔迹顺序保持不变
+function mergeAllDrawLayers() {
+  const d = state.draw;
+  if (d.layers.length < 2) return;
+  const target = activeDrawLayer();
+  const shapes = [];
+  d.layers.forEach(l => shapes.push(...l.shapes));
+  target.shapes = shapes;
+  d.layers = [target];
+  d.activeId = target.id;
+  renderDrawLayers();
+  renderAllShapes();
+  saveConfig();
+}
+document.getElementById('drawMergeAll').addEventListener('click', () => {
+  if (state.draw.layers.length < 2) return;
+  const target = activeDrawLayer();
+  showDataModal({
+    title: '合并图层',
+    message: `确定合并全部 ${state.draw.layers.length} 个图层吗？合并后仅保留当前图层「${target.name}」。`,
+    okText: '合并',
+    showCancel: true,
+    onOk: mergeAllDrawLayers,
+  });
+});
 
 document.getElementById('taijiEnable').addEventListener('change', e => state.taiji.enable = e.target.checked);
 document.getElementById('taijiSpeed').addEventListener('input', e => {
@@ -6367,7 +7924,6 @@ const BG_FONTS = {
   song: 'SimSun, "Songti SC", "STSong", serif',
   kai: 'KaiTi, "Kaiti SC", "STKaiti", serif',
   fangsong: 'FangSong, "STFangsong", serif',
-  zt: '"Chong Xi Small Seal", KaiTi, "Kaiti SC", serif',
 };
 
 // 代码雨：单个汉字竖排成列，字符取自背景关键词，黑白灰渐变
@@ -6760,6 +8316,7 @@ function bgAutoSwitchMode() {
   if (next === bg.mode) return;
   bg.mode = next;
   kwModeEl.value = next;
+  syncKwGradRow();
   bgBuildParticles();
 }
 
@@ -7012,6 +8569,12 @@ kwEnableEl.addEventListener('change', e => {
 
 const kwModeEl = document.getElementById('kwMode');
 kwModeEl.value = bg.mode;
+// 黑客帝国为整条雨丝预渲染，渐变参数不生效，隐藏整行
+const kwGradRowEl = document.getElementById('kwGradRow');
+function syncKwGradRow() {
+  if (kwGradRowEl) kwGradRowEl.classList.toggle('hidden', bg.mode === 'matrix');
+}
+syncKwGradRow();
 kwModeEl.addEventListener('change', e => {
   bg.mode = e.target.value;
   bg.switchTimer = 0;
@@ -7020,6 +8583,7 @@ kwModeEl.addEventListener('change', e => {
     if (kwWeightEl.value !== '300') { kwWeightEl.value = '300'; bg.fontWeight = 300; bgSprites.clear(); }
     if (kwSizeEl.value !== '0.8') { kwSizeEl.value = '0.8'; bg.fontScale = 0.8; }
   }
+  syncKwGradRow();
   bgBuildParticles();
 });
 
@@ -7136,10 +8700,9 @@ const ctrlRanges = ['globalSpeed', 'taijiSpeed', 'taijiTrans',
   'tianSpeed', 'tianCrossSpeed', 'tianXSpeed', 'tianTextSpeed',
   'fyCircleSpeed', 'fySquareSpeed', 'fyCrossSpeed', 'fyXSpeed', 'fyTaijiSpeed', 'fyTaijiTrans',
   'baguaTaijiSpeed', 'baguaTaijiTrans', 'baguaWuxingSpeed', 'baguaInnerSpeed', 'baguaOuterSpeed',
-  'baguaTianganSpeed', 'baguaDizhiSpeed', 'baguaJieqiSpeed', 'hetuSpeed', 'luoshuSpeed', 'drawSize'];
+  'baguaTianganSpeed', 'baguaDizhiSpeed', 'baguaJieqiSpeed', 'hetuSpeed', 'luoshuSpeed'];
 const ctrlVals = ['tianTextContent', 'tianTextFont', 'tianTextWeight', 'tianTextSize', 'tianTextColor', 'tianTextColorPicker',
-  'fyCircleOrder', 'fySquareOrder', 'baguaInnerOrder', 'baguaOuterOrder', 'goColor',
-  'drawType', 'drawColor', 'drawColorCustom'];
+  'fyCircleOrder', 'fySquareOrder', 'baguaInnerOrder', 'baguaOuterOrder', 'goColor'];
 const kwChecks = { enable: 'kwEnable', auto: 'kwAuto', lifeGrad: 'kwLifeGrad', sizeGrad: 'kwSizeGrad', colorGrad: 'kwColorGrad' };
 const kwVals = { interval: 'kwInterval', unit: 'kwUnit', order: 'kwOrder', mode: 'kwMode', font: 'kwFont', weight: 'kwWeight', size: 'kwSize', max: 'kwMax', pick: 'kwPick' };
 
@@ -7179,7 +8742,13 @@ function readConfig() {
     },
     // 围棋落子 / 画板笔迹（刷新后保留，重置全部时清空）
     go: { stones: goStones, next: goNext },
-    draw: { shapes: drawShapes },
+    draw: {
+      activeId: state.draw.activeId,
+      nextId: state.draw.nextId,
+      layers: state.draw.layers.map(l => ({
+        id: l.id, name: l.name, type: l.type, color: l.color, custom: l.custom, size: l.size, opacity: l.opacity, visible: l.visible !== false, shapes: l.shapes,
+      })),
+    },
     // 分组顺序：DOM（控制面板）+ draw（图层绘制）
     domOrder: state.domOrder.slice(),
     drawOrder: state.drawOrder.slice(),
@@ -7245,9 +8814,30 @@ function applyConfig(cfg) {
     fireEvent(id, 'change');
   });
 
-  // 画板笔迹 / 围棋落子：从缓存恢复（重置全部时会被清空）
-  const savedShapes = (cfg.draw && Array.isArray(cfg.draw.shapes)) ? cfg.draw.shapes : null;
-  drawShapes = savedShapes ? savedShapes.filter(s => s && typeof s.type === 'string') : [];
+  // 画板图层与笔迹：从缓存恢复（兼容旧版本的单层笔迹）
+  const savedDraw = cfg.draw || {};
+  const normShapes = arr => Array.isArray(arr) ? arr.filter(s => s && typeof s.type === 'string') : [];
+  let savedLayers = Array.isArray(savedDraw.layers) ? savedDraw.layers.filter(l => l && typeof l === 'object').map((l, i) => ({
+    id: Number.isFinite(l.id) ? l.id : i + 1,
+    name: (typeof l.name === 'string' && l.name.trim()) ? l.name.trim() : ('图层' + String(i + 1).padStart(2, '0')),
+    type: ['free', 'line', 'rect', 'circle', 'triangle'].indexOf(l.type) >= 0 ? l.type : 'free',
+    color: typeof l.color === 'string' ? l.color : '#000000',
+    custom: typeof l.custom === 'string' ? l.custom : '#000000',
+    size: Number.isFinite(l.size) ? Math.min(30, Math.max(1, l.size)) : 3,
+    opacity: Number.isFinite(l.opacity) ? Math.min(100, Math.max(10, l.opacity)) : 100,
+    visible: l.visible !== false,
+    shapes: normShapes(l.shapes),
+  })) : [];
+  if (savedLayers.length === 0) {
+    savedLayers = [{ id: 1, name: '图层01', type: 'free', color: '#000000', custom: '#000000', size: 3, opacity: 100, shapes: normShapes(savedDraw.shapes) }];
+  }
+  state.draw.layers = savedLayers;
+  const maxLayerId = savedLayers.reduce((m, l) => Math.max(m, l.id), 0);
+  state.draw.nextId = Math.max(Number.isFinite(savedDraw.nextId) ? savedDraw.nextId : 0, maxLayerId + 1);
+  state.draw.activeId = savedLayers.some(l => l.id === savedDraw.activeId) ? savedDraw.activeId : savedLayers[0].id;
+  // 分组显示关闭时，各图层显示同步为关闭
+  if (!state.draw.show) state.draw.layers.forEach(l => l.visible = false);
+  renderDrawLayers();
   renderAllShapes();
   const savedGo = cfg.go || {};
   goStones = Array.isArray(savedGo.stones)

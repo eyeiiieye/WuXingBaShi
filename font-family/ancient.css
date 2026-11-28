@@ -1,0 +1,20 @@
+/* 古文字字体：甲骨文（古联甲骨文摹写）、金文（中研院金文）、大篆（方正石鼓文）
+   注意：甲骨文与金文为古文字专用编码，需配合主文件的字形重映射表使用。 */
+
+@font-face {
+  font-family: "EyeJiaguwen";
+  src: url("./jiaguwen/jiaguwen.woff2") format("woff2");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "EyeJinwen";
+  src: url("./jinwen/jinwen.woff2") format("woff2");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "EyeDazhuan";
+  src: url("./dazhuan/dazhuan.woff2") format("woff2");
+  font-display: swap;
+}
